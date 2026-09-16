@@ -1,823 +1,743 @@
 <!doctype html>
+
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#f3f1eb">
-<meta name="description" content="ukraine@war — a daily record of Russia's war in Ukraine.">
-<meta property="og:title" content="ukraine@war">
-<meta property="og:description" content="A daily record of Russia's war in Ukraine.">
-<title>ukraine@war</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f3f1eb">
+  <meta
+    name="description"
+    content="ukraine@war — a daily record of Russia's war in Ukraine."
+  >
+  <meta property="og:title" content="ukraine@war">
+  <meta
+    property="og:description"
+    content="A daily record of Russia's war in Ukraine."
+  >
+  <title>ukraine@war</title>
 
-<style>
-:root{
-  --paper:#f3f1eb;
-  --ink:#0a0a09;
-  --gap:3px;
-  --cols:10;
-  --rows:7;
-  --dur:1200ms;
-}
+  <style>
+    :root {
+      --paper: #f3f1eb;
+      --ink: #0a0a09;
+      --gap: 3px;
+      --cols: 10;
+      --rows: 7;
+      --dur: 1200ms;
+    }
 
-*{box-sizing:border-box}
+    * {
+      box-sizing: border-box;
+    }
 
-html,body{
-  margin:0;
-  width:100%;
-  height:100%;
-  overflow:hidden;
-  background:var(--paper);
-  color:var(--ink);
-}
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--paper);
+      color: var(--ink);
+    }
 
-body{
-  font-family:Georgia,"Times New Roman",serif;
-}
+    body {
+      font-family: Georgia, "Times New Roman", serif;
+    }
 
-.stage{
-  position:fixed;
-  inset:0;
-  overflow:hidden;
-  background:var(--paper);
-}
+    .stage {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      background: var(--paper);
+    }
 
-.wall{
-  position:absolute;
-  inset:18px;
-  overflow:hidden;
-}
+    .wall {
+      position: absolute;
+      inset: 18px;
+      overflow: hidden;
+    }
 
-.tile{
-  position:absolute;
-  left:0;
-  top:0;
-  width:calc((100% - (var(--cols) - 1)*var(--gap))/var(--cols));
-  height:calc((100% - (var(--rows) - 1)*var(--gap))/var(--rows));
-  transition:
-    transform var(--dur) cubic-bezier(.2,.75,.2,1),
-    opacity var(--dur) ease;
-  will-change:transform;
-  pointer-events:none;
-}
+    .tile {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: calc(
+        (100% - (var(--cols) - 1) * var(--gap)) / var(--cols)
+      );
+      height: calc(
+        (100% - (var(--rows) - 1) * var(--gap)) / var(--rows)
+      );
+      transition:
+        transform var(--dur) cubic-bezier(.2,.75,.2,1),
+        opacity var(--dur) ease;
+      will-change: transform;
+      pointer-events: none;
+    }
 
-.tile::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  border:1px solid rgba(0,0,0,.07);
-  z-index:5;
-  pointer-events:none;
-}
+    .tile::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border: 1px solid rgba(0,0,0,.07);
+      z-index: 5;
+      pointer-events: none;
+    }
 
-.tile img{
-  position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  display:block;
-  user-select:none;
-  -webkit-user-drag:none;
-  pointer-events:none;
-  transition:
-    transform 2.2s cubic-bezier(.2,.7,.2,1),
-    filter 1.2s ease,
-    opacity .8s ease;
-}
+    .tile img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      user-select: none;
+      -webkit-user-drag: none;
+      pointer-events: none;
+      transition:
+        transform 2.2s cubic-bezier(.2,.7,.2,1),
+        filter 1.2s ease,
+        opacity .8s ease;
+    }
 
-.tile .back{
-  opacity:0;
-  z-index:2;
-}
+    .tile .back {
+      opacity: 0;
+      z-index: 2;
+    }
 
-.tile .front{
-  opacity:1;
-  z-index:1;
-}
+    .tile .front {
+      opacity: 1;
+      z-index: 1;
+    }
 
-.tile.change .front{
-  opacity:0;
-}
+    .tile.change .front {
+      opacity: 0;
+    }
 
-.tile.change .back{
-  opacity:1;
-  transform:scale(1.04);
-}
+    .tile.change .back {
+      opacity: 1;
+      transform: scale(1.04);
+    }
 
+    /* Masthead */
 
-/* Masthead */
+    .mast {
+      position: fixed;
+      z-index: 30;
+      top: 25px;
+      left: 27px;
+      pointer-events: none;
+      mix-blend-mode: multiply;
+    }
 
-.mast{
-  position:fixed;
-  z-index:30;
-  top:25px;
-  left:27px;
-  pointer-events:none;
-  mix-blend-mode:multiply;
-}
+    .mast h1 {
+      margin: 0;
+      font-size: clamp(18px, 2vw, 31px);
+      font-weight: 400;
+      letter-spacing: -.04em;
+      line-height: .9;
+    }
 
-.mast h1{
-  margin:0;
-  font-size:clamp(18px,2vw,31px);
-  font-weight:400;
-  letter-spacing:-.04em;
-  line-height:.9;
-}
+    .mast p {
+      margin: 9px 0 0;
+      font: 10px/1.2 Arial, sans-serif;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
 
-.mast p{
-  margin:9px 0 0;
-  font:10px/1.2 Arial,sans-serif;
-  letter-spacing:.16em;
-  text-transform:uppercase;
-}
+    /* Credit */
 
+    .mark {
+      position: fixed;
+      z-index: 30;
+      right: 28px;
+      top: 25px;
+      font: 10px/1 Arial, sans-serif;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      opacity: .72;
+    }
 
-/* Credit */
+    /* Substack link */
 
-.mark{
-  position:fixed;
-  z-index:30;
-  right:28px;
-  top:25px;
-  font:10px/1 Arial,sans-serif;
-  letter-spacing:.15em;
-  text-transform:uppercase;
-  writing-mode:vertical-rl;
-  transform:rotate(180deg);
-  opacity:.72;
-}
+    .subscribe {
+      position: fixed;
+      z-index: 35;
+      left: 27px;
+      bottom: 24px;
+      color: var(--ink);
+      text-decoration: none;
+      max-width: 340px;
+    }
 
+    .subscribe-label {
+      display: block;
+      margin-bottom: 7px;
+      font: 10px/1 Arial, sans-serif;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+      opacity: .62;
+    }
 
-/* Substack link */
+    .subscribe-title {
+      display: inline-block;
+      font: 16px/1.15 Georgia, "Times New Roman", serif;
+      letter-spacing: -.015em;
+      border-bottom: 1px solid rgba(10,10,9,.55);
+      padding-bottom: 2px;
+      transition: opacity .2s ease;
+    }
 
-.subscribe{
-  position:fixed;
-  z-index:35;
-  left:27px;
-  bottom:24px;
-  color:var(--ink);
-  text-decoration:none;
-  max-width:340px;
-}
+    .subscribe:hover .subscribe-title {
+      opacity: .58;
+    }
 
-.subscribe-label{
-  display:block;
-  margin-bottom:7px;
-  font:10px/1 Arial,sans-serif;
-  letter-spacing:.13em;
-  text-transform:uppercase;
-  opacity:.62;
-}
+    /* Controls */
 
-.subscribe-title{
-  display:inline-block;
-  font:16px/1.15 Georgia,"Times New Roman",serif;
-  letter-spacing:-.015em;
-  border-bottom:1px solid rgba(10,10,9,.55);
-  padding-bottom:2px;
-  transition:opacity .2s ease;
-}
+    .controls {
+      position: fixed;
+      z-index: 40;
+      right: 26px;
+      bottom: 23px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
 
-.subscribe:hover .subscribe-title{
-  opacity:.58;
-}
+    button {
+      border: 0;
+      background: transparent;
+      color: var(--ink);
+      font: 10px Arial, sans-serif;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+      padding: 7px 0;
+      cursor: pointer;
+    }
 
+    button:hover {
+      opacity: .55;
+    }
 
-/* Controls */
+    button + button {
+      margin-left: 14px;
+    }
 
-.controls{
-  position:fixed;
-  z-index:40;
-  right:26px;
-  bottom:23px;
-  display:flex;
-  gap:8px;
-  align-items:center;
-}
+    .rule {
+      width: 20px;
+      height: 1px;
+      background: currentColor;
+      opacity: .5;
+    }
 
-button{
-  border:0;
-  background:transparent;
-  color:var(--ink);
-  font:10px Arial,sans-serif;
-  letter-spacing:.13em;
-  text-transform:uppercase;
-  padding:7px 0;
-  cursor:pointer;
-}
+    .counter {
+      font: 10px Arial, sans-serif;
+      letter-spacing: .11em;
+      opacity: .65;
+    }
 
-button:hover{
-  opacity:.55;
-}
+    /* Intro */
 
-button+button{
-  margin-left:14px;
-}
+    .intro {
+      position: fixed;
+      z-index: 100;
+      inset: 0;
+      background: var(--paper);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      animation: intro 2.1s cubic-bezier(.65,0,.35,1) forwards;
+    }
 
-.rule{
-  width:20px;
-  height:1px;
-  background:currentColor;
-  opacity:.5;
-}
+    .intro span {
+      font-size: clamp(30px, 7vw, 100px);
+      letter-spacing: -.065em;
+      font-weight: 400;
+      transform: translateY(10px);
+      animation: introtext 1.8s ease forwards;
+    }
 
-.counter{
-  font:10px Arial,sans-serif;
-  letter-spacing:.11em;
-  opacity:.65;
-}
+    @keyframes intro {
+      0%, 72% {
+        opacity: 1;
+      }
 
+      100% {
+        opacity: 0;
+        visibility: hidden;
+      }
+    }
 
-/* Intro */
+    @keyframes introtext {
+      0% {
+        opacity: 0;
+        transform: translateY(20px);
+      }
 
-.intro{
-  position:fixed;
-  z-index:100;
-  inset:0;
-  background:var(--paper);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  pointer-events:none;
-  animation:intro 2.1s cubic-bezier(.65,0,.35,1) forwards;
-}
+      35% {
+        opacity: 1;
+        transform: translateY(0);
+      }
 
-.intro span{
-  font-size:clamp(30px,7vw,100px);
-  letter-spacing:-.065em;
-  font-weight:400;
-  transform:translateY(10px);
-  animation:introtext 1.8s ease forwards;
-}
+      72% {
+        opacity: 1;
+      }
 
-@keyframes intro{
-  0%,72%{opacity:1}
-  100%{opacity:0;visibility:hidden}
-}
+      100% {
+        opacity: 0;
+      }
+    }
 
-@keyframes introtext{
-  0%{
-    opacity:0;
-    transform:translateY(20px);
-  }
-  35%{
-    opacity:1;
-    transform:translateY(0);
-  }
-  72%{
-    opacity:1;
-  }
-  100%{
-    opacity:0;
-  }
-}
+    /* Mobile */
 
+    @media (max-width: 800px) {
+      .wall {
+        inset: 12px;
+      }
 
-/* Mobile */
+      .mast {
+        top: 18px;
+        left: 18px;
+      }
 
-@media(max-width:800px){
+      .mark {
+        right: 18px;
+        top: 18px;
+      }
 
-  .wall{
-    inset:12px;
-  }
+      .subscribe {
+        left: 18px;
+        bottom: 17px;
+      }
 
-  .mast{
-    top:18px;
-    left:18px;
-  }
+      .subscribe-title {
+        font-size: 15px;
+      }
 
-  .mark{
-    right:18px;
-    top:18px;
-  }
+      .controls {
+        right: 18px;
+        bottom: 15px;
+      }
 
-  .subscribe{
-    left:18px;
-    bottom:17px;
-  }
+      .tile {
+        width: calc(
+          (100% - (var(--cols) - 1) * 2px) / var(--cols)
+        );
+        height: calc(
+          (100% - (var(--rows) - 1) * 2px) / var(--rows)
+        );
+      }
+    }
 
-  .subscribe-title{
-    font-size:15px;
-  }
+    /* Reduced motion */
 
-  .controls{
-    right:18px;
-    bottom:15px;
-  }
+    @media (prefers-reduced-motion: reduce) {
+      .intro {
+        display: none;
+      }
 
-  .tile{
-    width:calc((100% - (var(--cols) - 1)*2px)/var(--cols));
-    height:calc((100% - (var(--rows) - 1)*2px)/var(--rows));
-  }
-}
+      .tile {
+        transition: none;
+      }
 
+      .tile img {
+        transition: none;
+      }
+    }
+  </style>
 
-/* Reduced motion */
-
-@media(prefers-reduced-motion:reduce){
-
-  .intro{
-    display:none;
-  }
-
-  .tile{
-    transition:none;
-  }
-
-  .tile img{
-    transition:none;
-  }
-}
-</style>
 </head>
 
 <body>
 
-<div class="stage">
+  <div class="stage">
 
-  <div
-    class="wall"
-    id="wall"
-    aria-label="A living wall of 67 images">
-  </div>
-
-  <div class="mast">
-    <h1>ukraine@war</h1>
-    <p>67 images / living wall</p>
-  </div>
-
-  <div class="mark">
-    drone dept. / 2026
-  </div>
-
-  <a
-    class="subscribe"
-    href="https://abdymok.substack.com/"
-    target="_blank"
-    rel="noopener noreferrer"
-    aria-label="Read and subscribe to ukraine@war on Substack">
-
-    <span class="subscribe-label">
-      The daily dispatch
-    </span>
-
-    <span class="subscribe-title">
-      Read &amp; subscribe on Substack →
-    </span>
-
-  </a>
-
-  <div class="controls">
-    <span class="counter" id="counter">01</span>
-    <span class="rule"></span>
-    <button id="shuffle">recompose</button>
-    <button id="pause">pause</button>
-  </div>
-
+```
+<div
+  class="wall"
+  id="wall"
+  aria-label="A living wall of 67 images">
 </div>
 
-<div class="intro">
-  <span>ukraine@war</span>
+<div class="mast">
+  <h1>ukraine@war</h1>
+  <p>67 images / living wall</p>
 </div>
 
+<div class="mark">
+  drone dept. / 2026
+</div>
 
-<script>
+<a
+  class="subscribe"
+  href="https://abdymok.substack.com/"
+  target="_blank"
+  rel="noopener noreferrer"
+  aria-label="Read and subscribe to ukraine@war on Substack"
+>
+  <span class="subscribe-label">
+    The daily dispatch
+  </span>
 
-/*
-  IMPORTANT:
-  The existing repository has the 67 JPG files
-  alongside index.html, so image paths are simply:
+  <span class="subscribe-title">
+    Read &amp; subscribe on Substack →
+  </span>
+</a>
 
-  1.jpg
-  2.jpg
-  ...
-  67.jpg
-*/
+<div class="controls">
+  <span class="counter" id="counter">01</span>
+  <span class="rule"></span>
+  <button id="shuffle" type="button">recompose</button>
+  <button id="pause" type="button">pause</button>
+</div>
+```
 
-const files = Array.from(
-  {length:67},
-  (_,i) => `${i+1}.jpg`
-);
+  </div>
 
-const wall =
-  document.getElementById("wall");
+  <div class="intro">
+    <span>ukraine@war</span>
+  </div>
 
-const counter =
-  document.getElementById("counter");
+  <script>
+    /*
+      Repository image structure:
 
-const pauseBtn =
-  document.getElementById("pause");
+      1.jfif
+      2.jfif
+      3.jfif
+      4.jfif
+      5.jfif
+      6.jfif
+      7.jpg
+      8.jpg
+      ...
+      67.jpg
 
-const shuffleBtn =
-  document.getElementById("shuffle");
+      All files live alongside index.html.
+    */
 
-const N = files.length;
-const SLOTS = 70;
-const COLS = 10;
-const ROWS = 7;
+    const files = [
+      "1.jfif",
+      "2.jfif",
+      "3.jfif",
+      "4.jfif",
+      "5.jfif",
+      "6.jfif",
+      ...Array.from(
+        { length: 61 },
+        (_, i) => `${i + 7}.jpg`
+      )
+    ];
 
-let tiles = [];
-let slotOf = [];
-let occupied = [];
-let cycle = 0;
-let paused = false;
-let timer;
+    const wall = document.getElementById("wall");
+    const counter = document.getElementById("counter");
+    const pauseBtn = document.getElementById("pause");
+    const shuffleBtn = document.getElementById("shuffle");
 
+    const N = files.length;
+    const SLOTS = 70;
+    const COLS = 10;
+    const ROWS = 7;
 
-/* Position a tile */
+    let tiles = [];
+    let slotOf = [];
+    let cycle = 0;
+    let paused = false;
+    let timer = null;
 
-function xy(slot){
+    /* Position a tile */
 
-  const c = slot % COLS;
-  const r = Math.floor(slot / COLS);
+    function xy(slot) {
+      const c = slot % COLS;
+      const r = Math.floor(slot / COLS);
 
-  return {
-    x:`calc(${c} * ((100% - ${(COLS-1)}*var(--gap)) / ${COLS} + var(--gap))`,
-    y:`calc(${r} * ((100% - ${(ROWS-1)}*var(--gap)) / ${ROWS} + var(--gap))`
-  };
-}
+      return {
+        x: `calc(${c} * ((100% - ${(COLS - 1)} * var(--gap)) / ${COLS} + var(--gap))`,
+        y: `calc(${r} * ((100% - ${(ROWS - 1)} * var(--gap)) / ${ROWS} + var(--gap))`
+      };
+    }
 
+    function place(el, slot) {
+      const p = xy(slot);
+      el.style.transform = `translate(${p.x}, ${p.y})`;
+    }
 
-function place(el,slot){
+    /* Create a photograph tile */
 
-  const p = xy(slot);
+    function make(i) {
+      const tile = document.createElement("figure");
+      tile.className = "tile";
 
-  el.style.transform =
-    `translate(${p.x},${p.y})`;
-}
+      const front = document.createElement("img");
+      const back = document.createElement("img");
 
+      front.className = "front";
+      back.className = "back";
 
-/* Create a photograph tile */
+      front.alt = "";
+      back.alt = "";
 
-function make(i){
+      front.loading = i < 20 ? "eager" : "lazy";
+      front.decoding = "async";
+      back.decoding = "async";
 
-  const tile =
-    document.createElement("figure");
+      front.src = files[i];
 
-  tile.className = "tile";
+      tile.append(front, back);
+      wall.append(tile);
 
-  const front =
-    document.createElement("img");
+      return tile;
+    }
 
-  const back =
-    document.createElement("img");
+    /* Fisher-Yates shuffle */
 
-  front.className = "front";
-  back.className = "back";
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
 
-  front.alt = "";
-  back.alt = "";
+        [array[i], array[j]] = [array[j], array[i]];
+      }
 
-  front.loading =
-    i < 20 ? "eager" : "lazy";
+      return array;
+    }
 
-  front.src =
-    files[i];
+    /* Random initial positions */
 
-  tile.append(front,back);
-
-  wall.append(tile);
-
-  return tile;
-}
-
-
-/* Random initial positions */
-
-function sampleSlots(){
-
-  const slots =
-    Array.from(
-      {length:SLOTS},
-      (_,i)=>i
-    );
-
-  for(
-    let i=slots.length-1;
-    i>0;
-    i--
-  ){
-
-    const j =
-      Math.floor(
-        Math.random()*(i+1)
+    function sampleSlots() {
+      const slots = Array.from(
+        { length: SLOTS },
+        (_, i) => i
       );
 
-    [
-      slots[i],
-      slots[j]
-    ]=[
-      slots[j],
-      slots[i]
-    ];
-  }
+      shuffle(slots);
 
-  return slots.slice(0,N);
-}
+      return slots.slice(0, N);
+    }
 
+    /* Initial wall */
 
-/* Initial wall */
+    function initial() {
+      slotOf = sampleSlots();
 
-function initial(){
+      tiles = files.map((_, i) => make(i));
 
-  occupied =
-    sampleSlots();
+      tiles.forEach((tile, i) => {
+        place(tile, slotOf[i]);
+      });
+    }
 
-  tiles =
-    files.map((_,i)=>make(i));
+    /*
+      Recompose.
 
-  tiles.forEach((tile,i)=>{
+      There are only 3 empty slots because:
+      70 total slots - 67 images = 3 empty slots.
 
-    slotOf[i] =
-      occupied[i];
+      We therefore move at most 3 tiles per cycle.
+      This prevents two tiles from being assigned
+      to the same slot.
+    */
 
-    place(
-      tile,
-      slotOf[i]
-    );
+    function recompose() {
+      if (paused) return;
 
-  });
-}
+      cycle++;
 
+      counter.textContent =
+        String(cycle).padStart(2, "0");
 
-/* Empty positions */
-
-function freeSlots(){
-
-  const used =
-    new Set(slotOf);
-
-  return Array.from(
-    {length:SLOTS},
-    (_,i)=>i
-  ).filter(
-    i=>!used.has(i)
-  );
-}
-
-
-/* Recompose */
-
-function recompose(){
-
-  if(paused)return;
-
-  cycle++;
-
-  counter.textContent =
-    String(cycle).padStart(2,"0");
-
-  const movers =
-    Math.random()<.35
-      ? 18
-      : 12;
-
-  const ids =
-    Array.from(
-      {length:N},
-      (_,i)=>i
-    );
-
-  for(
-    let i=ids.length-1;
-    i>0;
-    i--
-  ){
-
-    const j =
-      Math.floor(
-        Math.random()*(i+1)
+      const movers = Math.min(
+        3,
+        1 + Math.floor(Math.random() * 3)
       );
 
-    [
-      ids[i],
-      ids[j]
-    ]=[
-      ids[j],
-      ids[i]
-    ];
-  }
-
-  const selected =
-    ids.slice(0,movers);
-
-  const targetPool =
-    [...freeSlots()];
-
-  for(
-    let i=targetPool.length-1;
-    i>0;
-    i--
-  ){
-
-    const j =
-      Math.floor(
-        Math.random()*(i+1)
+      const ids = shuffle(
+        Array.from(
+          { length: N },
+          (_, i) => i
+        )
       );
 
-    [
-      targetPool[i],
-      targetPool[j]
-    ]=[
-      targetPool[j],
-      targetPool[i]
-    ];
-  }
+      const selected = ids.slice(0, movers);
 
+      const used = new Set(slotOf);
 
-  selected.forEach((id,k)=>{
+      const targetPool = shuffle(
+        Array.from(
+          { length: SLOTS },
+          (_, i) => i
+        ).filter(slot => !used.has(slot))
+      );
 
-    const target =
-      targetPool[
-        k % targetPool.length
-      ];
+      selected.forEach((id, k) => {
+        const target = targetPool[k];
 
-    if(
-      target === slotOf[id]
-    )return;
+        if (target === undefined) return;
 
-    slotOf[id] =
-      target;
+        slotOf[id] = target;
 
-    place(
-      tiles[id],
-      target
-    );
+        place(tiles[id], target);
 
+        /*
+          Occasionally dissolve the tile into
+          another photograph.
+        */
 
-    /* Occasionally dissolve
-       to another photograph */
+        if (Math.random() < 0.62) {
+          dissolveToRandomImage(tiles[id]);
+        }
+      });
 
-    if(Math.random()<.62){
+      /*
+        Occasionally exchange the photographs
+        belonging to two tiles without changing
+        their positions.
+      */
 
-      const back =
-        tiles[id]
-          .querySelector(".back");
-
-      const next =
-        files[
-          Math.floor(
-            Math.random()*N
-          )
-        ];
-
-      if(
-        back.src !==
-        new URL(
-          next,
-          location.href
-        ).href
-      ){
-
-        back.src = next;
-
-        tiles[id]
-          .classList
-          .add("change");
-
-        setTimeout(()=>{
-
-          tiles[id]
-            .querySelector(".front")
-            .src = back.src;
-
-          tiles[id]
-            .classList
-            .remove("change");
-
-        },900);
+      if (Math.random() < 0.55) {
+        exchangeImages(ids[0], ids[1]);
       }
     }
-  });
 
+    /* Crossfade one tile to another image */
 
-  /* Occasionally exchange two
-     photographs without moving
-     their positions */
+    function dissolveToRandomImage(tile) {
+      const front = tile.querySelector(".front");
+      const back = tile.querySelector(".back");
 
-  if(Math.random()<.55){
+      const current = front.getAttribute("src");
 
-    const a = ids[0];
-    const b = ids[1];
+      let next = current;
 
-    const ia =
-      tiles[a]
-        .querySelector(".front")
-        .src;
+      if (files.length > 1) {
+        while (next === current) {
+          next =
+            files[
+              Math.floor(
+                Math.random() * files.length
+              )
+            ];
+        }
+      }
 
-    const ib =
-      tiles[b]
-        .querySelector(".front")
-        .src;
+      back.src = next;
 
-    tiles[a]
-      .querySelector(".back")
-      .src = ib;
+      tile.classList.add("change");
 
-    tiles[b]
-      .querySelector(".back")
-      .src = ia;
+      setTimeout(() => {
+        front.src = next;
+        tile.classList.remove("change");
+      }, 900);
+    }
 
-    tiles[a]
-      .classList
-      .add("change");
+    /* Exchange images between two tiles */
 
-    tiles[b]
-      .classList
-      .add("change");
+    function exchangeImages(a, b) {
+      if (
+        a === undefined ||
+        b === undefined ||
+        a === b
+      ) {
+        return;
+      }
 
+      const tileA = tiles[a];
+      const tileB = tiles[b];
 
-    setTimeout(()=>{
+      const frontA =
+        tileA.querySelector(".front");
 
-      tiles[a]
-        .querySelector(".front")
-        .src = ib;
+      const frontB =
+        tileB.querySelector(".front");
 
-      tiles[b]
-        .querySelector(".front")
-        .src = ia;
+      const backA =
+        tileA.querySelector(".back");
 
-      tiles[a]
-        .classList
-        .remove("change");
+      const backB =
+        tileB.querySelector(".back");
 
-      tiles[b]
-        .classList
-        .remove("change");
+      const imageA =
+        frontA.getAttribute("src");
 
-    },900);
-  }
-}
+      const imageB =
+        frontB.getAttribute("src");
 
+      backA.src = imageB;
+      backB.src = imageA;
 
-/* Start animation */
+      tileA.classList.add("change");
+      tileB.classList.add("change");
 
-function start(){
+      setTimeout(() => {
+        frontA.src = imageB;
+        frontB.src = imageA;
 
-  clearInterval(timer);
+        tileA.classList.remove("change");
+        tileB.classList.remove("change");
+      }, 900);
+    }
 
-  timer =
-    setInterval(
-      recompose,
-      4200
-    );
-}
+    /* Start animation */
 
-
-/* Manual recompose */
-
-shuffleBtn.onclick = ()=>{
-
-  recompose();
-
-  if(!paused){
-    start();
-  }
-};
-
-
-/* Pause */
-
-pauseBtn.onclick = ()=>{
-
-  paused = !paused;
-
-  pauseBtn.textContent =
-    paused ? "play" : "pause";
-
-  if(paused){
-    clearInterval(timer);
-  }else{
-    start();
-  }
-};
-
-
-/* Pause when browser tab isn't visible */
-
-document.addEventListener(
-  "visibilitychange",
-  ()=>{
-
-    if(document.hidden){
-
+    function start() {
       clearInterval(timer);
 
-    }else if(!paused){
-
-      start();
-
+      timer = setInterval(
+        recompose,
+        4200
+      );
     }
-  }
-);
 
+    /* Manual recompose */
 
-/* Go */
+    shuffleBtn.addEventListener(
+      "click",
+      () => {
+        recompose();
 
-initial();
-start();
+        if (!paused) {
+          start();
+        }
+      }
+    );
 
-</script>
+    /* Pause / play */
+
+    pauseBtn.addEventListener(
+      "click",
+      () => {
+        paused = !paused;
+
+        pauseBtn.textContent =
+          paused ? "play" : "pause";
+
+        if (paused) {
+          clearInterval(timer);
+        } else {
+          start();
+        }
+      }
+    );
+
+    /* Pause when browser tab isn't visible */
+
+    document.addEventListener(
+      "visibilitychange",
+      () => {
+        if (document.hidden) {
+          clearInterval(timer);
+        } else if (!paused) {
+          start();
+        }
+      }
+    );
+
+    /* Go */
+
+    initial();
+    start();
+  </script>
 
 </body>
 </html>
