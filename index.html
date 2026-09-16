@@ -1,343 +1,690 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Image Grid</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f3f1eb">
+<meta name="description" content="ukraine@war — a daily record of Russia's war in Ukraine.">
+<meta property="og:title" content="ukraine@war">
+<meta property="og:description" content="A daily record of Russia's war in Ukraine.">
+<title>ukraine@war</title>
+
 <style>
-  :root {
-    --gap: 10px;
-    --bg: #ffffff;
-    --dissolve: 1.4s;
+:root{
+  --paper:#f3f1eb;
+  --ink:#0a0a09;
+  --gap:3px;
+  --cols:10;
+  --rows:7;
+  --dur:1200ms;
+}
+
+*{box-sizing:border-box}
+
+html,body{
+  margin:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  background:var(--paper);
+  color:var(--ink);
+}
+
+body{
+  font-family:Georgia,"Times New Roman",serif;
+}
+
+.stage{
+  position:fixed;
+  inset:0;
+  background:var(--paper);
+  overflow:hidden;
+}
+
+.wall{
+  position:absolute;
+  inset:18px;
+  overflow:hidden;
+}
+
+.tile{
+  position:absolute;
+  left:0;
+  top:0;
+  width:calc((100% - (var(--cols) - 1)*var(--gap))/var(--cols));
+  height:calc((100% - (var(--rows) - 1)*var(--gap))/var(--rows));
+  transition:
+    transform var(--dur) cubic-bezier(.2,.75,.2,1),
+    opacity var(--dur) ease;
+  will-change:transform;
+  pointer-events:none;
+}
+
+.tile::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  border:1px solid rgba(0,0,0,.07);
+  z-index:5;
+  pointer-events:none;
+}
+
+.tile img{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+  user-select:none;
+  -webkit-user-drag:none;
+  pointer-events:none;
+  transition:
+    transform 2.2s cubic-bezier(.2,.7,.2,1),
+    filter 1.2s ease,
+    opacity .8s ease;
+}
+
+.tile .back{
+  opacity:0;
+  z-index:2;
+}
+
+.tile .front{
+  opacity:1;
+  z-index:1;
+}
+
+.tile.change .front{
+  opacity:0;
+}
+
+.tile.change .back{
+  opacity:1;
+  transform:scale(1.04);
+}
+
+/* Black voids */
+.void{
+  background:var(--ink);
+  opacity:1;
+  transition:
+    transform 1400ms cubic-bezier(.2,.75,.2,1),
+    opacity 800ms ease;
+}
+
+.void::after{
+  content:"";
+  position:absolute;
+  inset:9px;
+  border:1px solid rgba(243,241,235,.16);
+}
+
+
+/* Masthead */
+
+.mast{
+  position:fixed;
+  z-index:30;
+  top:25px;
+  left:27px;
+  pointer-events:none;
+  mix-blend-mode:multiply;
+}
+
+.mast h1{
+  margin:0;
+  font-size:clamp(18px,2vw,31px);
+  font-weight:400;
+  letter-spacing:-.04em;
+  line-height:.9;
+}
+
+.mast p{
+  margin:9px 0 0;
+  font:10px/1.2 Arial,sans-serif;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+}
+
+
+/* Credit */
+
+.mark{
+  position:fixed;
+  z-index:30;
+  right:28px;
+  top:25px;
+  font:10px/1 Arial,sans-serif;
+  letter-spacing:.15em;
+  text-transform:uppercase;
+  writing-mode:vertical-rl;
+  transform:rotate(180deg);
+  opacity:.72;
+}
+
+
+/* Substack */
+
+.subscribe{
+  position:fixed;
+  z-index:35;
+  left:27px;
+  bottom:24px;
+  color:var(--ink);
+  text-decoration:none;
+  max-width:340px;
+}
+
+.subscribe-label{
+  display:block;
+  margin-bottom:7px;
+  font:10px/1 Arial,sans-serif;
+  letter-spacing:.13em;
+  text-transform:uppercase;
+  opacity:.62;
+}
+
+.subscribe-title{
+  display:inline-block;
+  font:16px/1.15 Georgia,"Times New Roman",serif;
+  letter-spacing:-.015em;
+  border-bottom:1px solid rgba(10,10,9,.55);
+  padding-bottom:2px;
+  transition:opacity .2s ease,border-color .2s ease;
+}
+
+.subscribe:hover .subscribe-title{
+  opacity:.62;
+  border-color:var(--ink);
+}
+
+
+/* Controls */
+
+.controls{
+  position:fixed;
+  z-index:40;
+  right:26px;
+  bottom:23px;
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+
+button{
+  border:0;
+  background:transparent;
+  color:var(--ink);
+  font:10px Arial,sans-serif;
+  letter-spacing:.13em;
+  text-transform:uppercase;
+  padding:7px 0;
+  cursor:pointer;
+}
+
+button:hover{
+  opacity:.55;
+}
+
+button+button{
+  margin-left:14px;
+}
+
+.rule{
+  width:20px;
+  height:1px;
+  background:currentColor;
+  opacity:.5;
+}
+
+.counter{
+  font:10px Arial,sans-serif;
+  letter-spacing:.11em;
+  opacity:.65;
+}
+
+
+/* Opening title */
+
+.intro{
+  position:fixed;
+  z-index:100;
+  inset:0;
+  background:var(--paper);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  pointer-events:none;
+  animation:intro 2.1s cubic-bezier(.65,0,.35,1) forwards;
+}
+
+.intro span{
+  font-size:clamp(30px,7vw,100px);
+  letter-spacing:-.065em;
+  font-weight:400;
+  transform:translateY(10px);
+  animation:introtext 1.8s ease forwards;
+}
+
+@keyframes intro{
+  0%,72%{opacity:1}
+  100%{opacity:0;visibility:hidden}
+}
+
+@keyframes introtext{
+  0%{
+    opacity:0;
+    transform:translateY(20px);
   }
-  html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    background: var(--bg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
+  35%{
+    opacity:1;
+    transform:translateY(0);
   }
-  #grid {
-    position: relative;
-    width: min(92vw, 92vh);
-    height: min(92vw, 92vh);
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    grid-template-rows: repeat(5, 1fr);
-    gap: var(--gap);
-    filter: drop-shadow(0 20px 40px rgba(0,0,0,0.10));
+  72%{
+    opacity:1;
   }
-  .cell {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    background: #f0f0f0;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: transform 0.35s ease, box-shadow 0.35s ease;
+  100%{
+    opacity:0;
   }
-  .cell:hover {
-    transform: scale(1.04);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.18);
-    z-index: 2;
+}
+
+
+/* Mobile */
+
+@media(max-width:800px){
+
+  .wall{
+    inset:12px;
   }
-  .cell.hero {
-    z-index: 3;
-    box-shadow: 0 18px 44px rgba(0,0,0,0.28);
+
+  .mast{
+    top:18px;
+    left:18px;
   }
-  .cell.hero:hover {
-    transform: none; /* don't also scale-hover a cell that's already enlarged */
+
+  .mast p{
+    margin-top:8px;
   }
-  .layer {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    opacity: 0;
-    filter: grayscale(1);
-    transform: scale(1.04);
-    transition: opacity var(--dissolve) ease, transform var(--dissolve) ease, filter calc(var(--dissolve) * 1.3) ease;
+
+  .mark{
+    right:18px;
+    top:18px;
   }
-  .layer.visible {
-    opacity: 1;
-    filter: grayscale(0);
-    transform: scale(1);
+
+  .subscribe{
+    left:18px;
+    bottom:17px;
   }
-  #vignette {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 5;
-    background: radial-gradient(circle at 50% 50%, rgba(0,0,0,0) 45%, rgba(0,0,0,0.06) 100%);
+
+  .subscribe-title{
+    font-size:15px;
   }
-  #watermark {
-    position: fixed;
-    bottom: 18px;
-    right: 22px;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    font-size: 12px;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: rgba(0,0,0,0.32);
-    pointer-events: none;
-    user-select: none;
-    z-index: 6;
+
+  .controls{
+    right:18px;
+    bottom:15px;
   }
+
+  .tile{
+    width:calc((100% - (var(--cols) - 1)*2px)/var(--cols));
+    height:calc((100% - (var(--rows) - 1)*2px)/var(--rows));
+  }
+}
+
+
+/* Reduced motion */
+
+@media(prefers-reduced-motion:reduce){
+
+  .intro{
+    display:none;
+  }
+
+  .tile{
+    transition:none;
+  }
+
+  .tile img{
+    transition:none;
+  }
+}
 </style>
 </head>
+
 <body>
 
-<div id="grid"></div>
-<div id="vignette"></div>
-<div id="watermark">ukraine@war</div>
+<div class="stage">
+
+  <div
+    class="wall"
+    id="wall"
+    aria-label="A living wall of 67 images">
+  </div>
+
+  <div class="mast">
+    <h1>ukraine@war</h1>
+    <p>67 images / living wall</p>
+  </div>
+
+  <div class="mark">
+    drone dept. / 2026
+  </div>
+
+  <a
+    class="subscribe"
+    href="https://abdymok.substack.com/"
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="Read and subscribe to ukraine@war on Substack">
+    <span class="subscribe-label">The daily dispatch</span>
+    <span class="subscribe-title">Read &amp; subscribe on Substack →</span>
+  </a>
+
+  <div class="controls">
+    <span class="counter" id="counter">01</span>
+    <span class="rule"></span>
+    <button id="shuffle">recompose</button>
+    <button id="pause">pause</button>
+  </div>
+
+</div>
+
+<div class="intro">
+  <span>ukraine@war</span>
+</div>
+
 
 <script>
-/* ---------- CONFIG ---------- */
-const TOTAL_IMAGES    = 67;      // total files available in /images (named 1.jpg ... 67.jpg)
-const IMAGE_FOLDER    = "";      // "" = same folder as index.html; set e.g. "images" to use a subfolder instead
-const IMAGE_EXT       = "jpg";
-const GRID_SIZE       = 5;       // 5x5
-const SWAP_INTERVAL   = 1600;    // ms between individual swap events (base — actual timing is jittered)
-const SHUFFLE_EVERY   = 5000;    // ms between full position shuffles (base — actual timing is jittered)
-const SWAPS_PER_TICK  = 1;       // how many cells swap at each interval tick
-const DISSOLVE_MIN    = 1100;    // ms — fastest a single dissolve can be
-const DISSOLVE_MAX    = 1900;    // ms — slowest a single dissolve can be
-const CLICK_URL       = "https://abdymok.substack.com"; // set to "" to disable click-through
-const JITTER          = 0.5;     // +/- 50% randomness on timers, for a less mechanical feel
-const HERO_INTERVAL   = 7000;    // ms between featured 2x2 tiles (base — jittered)
-const HERO_DURATION   = 5000;    // ms a featured tile stays enlarged
+const files=[
+  "1.jfif",
+  "2.jfif",
+  "3.jfif",
+  "4.jfif",
+  "5.jfif",
+  "6.jfif",
+  ...Array.from({length:61},(_,i)=>`${i+7}.jpg`)
+];
 
-function jitter(ms) {
-  return ms * (1 - JITTER + Math.random() * JITTER * 2);
+const wall=document.getElementById("wall");
+const counter=document.getElementById("counter");
+const pauseBtn=document.getElementById("pause");
+const shuffleBtn=document.getElementById("shuffle");
+
+const N=files.length;
+const SLOTS=70;
+const COLS=10;
+const ROWS=7;
+
+let tiles=[];
+let slotOf=[];
+let occupied=[];
+let cycle=0;
+let paused=false;
+let timer;
+
+
+function xy(slot){
+  const c=slot%COLS;
+  const r=Math.floor(slot/COLS);
+
+  return {
+    x:`calc(${c} * ((100% - ${(COLS-1)}*var(--gap)) / ${COLS} + var(--gap))`,
+    y:`calc(${r} * ((100% - ${(ROWS-1)}*var(--gap)) / ${ROWS} + var(--gap))`
+  };
 }
 
-function randomDissolveMs() {
-  return DISSOLVE_MIN + Math.random() * (DISSOLVE_MAX - DISSOLVE_MIN);
+
+function place(el,slot){
+  const p=xy(slot);
+  el.style.transform=`translate(${p.x},${p.y})`;
 }
 
-// Applies a one-off transition duration to a layer for this dissolve only,
-// so not every swap takes the exact same amount of time.
-function setDissolveDuration(img, ms) {
-  img.style.transitionDuration = `${ms}ms, ${ms}ms, ${ms * 1.3}ms`; // matches opacity, transform, filter order in .layer
+
+function make(i){
+
+  const t=document.createElement("figure");
+  t.className="tile";
+
+  const a=document.createElement("img");
+  const b=document.createElement("img");
+
+  a.className="front";
+  b.className="back";
+
+  a.alt="";
+  b.alt="";
+
+  a.loading=i<20?"eager":"lazy";
+
+  a.src=`images/${files[i]}`;
+
+  t.append(a,b);
+  wall.append(t);
+
+  return t;
 }
 
-function imgSrc(id) {
-  return IMAGE_FOLDER ? `${IMAGE_FOLDER}/${id}.${IMAGE_EXT}` : `${id}.${IMAGE_EXT}`;
-}
 
-// Loads `id` into `img`. If it fails (missing/corrupt file), automatically
-// tries a different unused id instead of leaving the cell blank. Logs a
-// console warning each time so bad files are easy to spot and fix.
-function tryLoad(img, id, attemptsLeft, onSuccess) {
-  function cleanup() {
-    img.removeEventListener("load", onLoad);
-    img.removeEventListener("error", onError);
-  }
-  function onLoad() { cleanup(); onSuccess(id); }
-  function onError() {
-    cleanup();
-    console.warn("Skipping missing or broken image:", imgSrc(id));
-    usedSet.delete(id);
-    if (attemptsLeft <= 0) { onSuccess(id); return; } // give up rather than loop forever
-    const nextId = nextUnusedId();
-    usedSet.add(nextId);
-    tryLoad(img, nextId, attemptsLeft - 1, onSuccess);
-  }
-  img.addEventListener("load", onLoad, { once: true });
-  img.addEventListener("error", onError, { once: true });
-  img.src = imgSrc(id);
-}
+function sampleSlots(){
 
-function shuffleArray(arr) {
-  const a = arr.slice();
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
+  const a=Array.from(
+    {length:SLOTS},
+    (_,i)=>i
+  );
 
-function makeLayer() {
-  const img = document.createElement("img");
-  img.alt = "";
-  img.className = "layer";
-  return img;
-}
-
-/* ---------- SETUP ---------- */
-const cellCount = GRID_SIZE * GRID_SIZE;
-const allIds = Array.from({length: TOTAL_IMAGES}, (_, i) => i + 1);
-
-let pool = shuffleArray(allIds);
-let visibleIds = pool.slice(0, cellCount);
-let usedSet = new Set(visibleIds);
-
-const grid = document.getElementById("grid");
-const cells = [];
-
-// Explicit grid placement (rather than relying on DOM order + auto-placement)
-// is what lets one cell span 2x2 for the featured-tile effect.
-function applyGridPos(cellData) {
-  cellData.el.style.gridRow = `${cellData.row} / span 1`;
-  cellData.el.style.gridColumn = `${cellData.col} / span 1`;
-}
-
-for (let i = 0; i < cellCount; i++) {
-  const row = Math.floor(i / GRID_SIZE) + 1;
-  const col = (i % GRID_SIZE) + 1;
-
-  const cell = document.createElement("div");
-  cell.className = "cell";
-  grid.appendChild(cell);
-
-  const img = makeLayer();
-  cell.appendChild(img); // attach immediately — this is what kicks off the fetch reliably
-
-  const cellData = { el: cell, img, currentId: visibleIds[i], busy: true, row, col };
-  applyGridPos(cellData);
-  cells.push(cellData);
-
-  if (CLICK_URL) {
-    cell.addEventListener("click", () => window.open(CLICK_URL, "_blank", "noopener"));
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
   }
 
-  tryLoad(img, visibleIds[i], TOTAL_IMAGES, (finalId) => {
-    cellData.currentId = finalId;
-    cellData.busy = false;
-    setTimeout(() => img.classList.add("visible"), i * 60);
+  return a.slice(0,N);
+}
+
+
+function initial(){
+
+  occupied=sampleSlots();
+
+  tiles=files.map((_,i)=>make(i));
+
+  tiles.forEach((t,i)=>{
+    slotOf[i]=occupied[i];
+    place(t,slotOf[i]);
   });
 }
 
-/* ---------- SWAP LOGIC (dissolve: new image crossfades in on top of the old one) ---------- */
-function nextUnusedId() {
-  const candidates = allIds.filter(id => !usedSet.has(id));
-  if (candidates.length === 0) {
-    return allIds[Math.floor(Math.random() * allIds.length)];
+
+function freeSlots(){
+
+  const used=new Set(slotOf);
+
+  return Array.from(
+    {length:SLOTS},
+    (_,i)=>i
+  ).filter(i=>!used.has(i));
+}
+
+
+function recompose(){
+
+  if(paused)return;
+
+  cycle++;
+
+  counter.textContent=
+    String(cycle).padStart(2,"0");
+
+  const movers=
+    Math.random()<.35 ? 18 : 12;
+
+  const ids=Array.from(
+    {length:N},
+    (_,i)=>i
+  );
+
+  for(let i=ids.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [ids[i],ids[j]]=[ids[j],ids[i]];
   }
-  return candidates[Math.floor(Math.random() * candidates.length)];
-}
 
-function swapRandomCell() {
-  // only ever touch a cell that isn't already mid-transition (or currently
-  // the featured hero / hidden behind it) — re-picking a busy cell is what
-  // caused the old flicker bug.
-  const idleIndices = cells.map((_, i) => i).filter(i => !cells[i].busy);
-  if (idleIndices.length === 0) return;
-  const idx = idleIndices[Math.floor(Math.random() * idleIndices.length)];
-  const cellData = cells[idx];
-  const oldImg = cellData.img;
+  const selected=ids.slice(0,movers);
 
-  cellData.busy = true;
-  usedSet.delete(cellData.currentId);
-  const newId = nextUnusedId();
-  usedSet.add(newId);
+  const targetPool=[...freeSlots()];
 
-  const newImg = makeLayer();
-  cellData.el.appendChild(newImg); // attach immediately, on top of oldImg — cell is always fully covered by oldImg underneath while newImg loads
+  for(let i=targetPool.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [targetPool[i],targetPool[j]]=[
+      targetPool[j],
+      targetPool[i]
+    ];
+  }
 
-  const dur = randomDissolveMs();
-  setDissolveDuration(newImg, dur);
-  setDissolveDuration(oldImg, dur);
+  selected.forEach((id,k)=>{
 
-  tryLoad(newImg, newId, TOTAL_IMAGES, (finalId) => {
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        newImg.classList.add("visible");    // new image dissolves in
-        oldImg.classList.remove("visible"); // old image dissolves out, simultaneously
-      });
-    });
-    setTimeout(() => {
-      oldImg.remove();
-      cellData.img = newImg;
-      cellData.currentId = finalId;
-      cellData.busy = false;
-    }, dur + 80);
+    const target=
+      targetPool[k%targetPool.length];
+
+    if(target===slotOf[id])return;
+
+    slotOf[id]=target;
+
+    place(tiles[id],target);
+
+    if(Math.random()<.62){
+
+      const back=
+        tiles[id].querySelector(".back");
+
+      const next=
+        files[Math.floor(Math.random()*N)];
+
+      const nextURL=
+        new URL(
+          `images/${next}`,
+          location.href
+        ).href;
+
+      if(back.src!==nextURL){
+
+        back.src=`images/${next}`;
+
+        tiles[id].classList.add("change");
+
+        setTimeout(()=>{
+
+          tiles[id]
+            .querySelector(".front")
+            .src=back.src;
+
+          tiles[id]
+            .classList.remove("change");
+
+        },900);
+      }
+    }
   });
+
+
+  if(Math.random()<.55){
+
+    const a=ids[0];
+    const b=ids[1];
+
+    const ia=
+      tiles[a]
+        .querySelector(".front")
+        .src;
+
+    const ib=
+      tiles[b]
+        .querySelector(".front")
+        .src;
+
+    tiles[a]
+      .querySelector(".back")
+      .src=ib;
+
+    tiles[b]
+      .querySelector(".back")
+      .src=ia;
+
+    tiles[a].classList.add("change");
+    tiles[b].classList.add("change");
+
+    setTimeout(()=>{
+
+      tiles[a]
+        .querySelector(".front")
+        .src=ib;
+
+      tiles[b]
+        .querySelector(".front")
+        .src=ia;
+
+      tiles[a]
+        .classList.remove("change");
+
+      tiles[b]
+        .classList.remove("change");
+
+    },900);
+  }
 }
 
-/* ---------- POSITION SHUFFLE (randomly reassign which cell sits where) ---------- */
-function shufflePositions() {
-  // exclude any cell currently frozen by an active hero — reassigning their
-  // slot while they're not rendered there is what caused blank squares
-  const movable = cells.filter(c => !c.frozen);
-  const positions = movable.map(c => ({ row: c.row, col: c.col }));
-  const shuffled = shuffleArray(positions);
-  movable.forEach((c, i) => {
-    c.row = shuffled[i].row;
-    c.col = shuffled[i].col;
-    applyGridPos(c);
-  });
+
+function start(){
+
+  clearInterval(timer);
+
+  timer=setInterval(
+    recompose,
+    4200
+  );
 }
 
-/* ---------- FEATURED TILE (occasionally one cell spans 2x2) ---------- */
-let heroActive = false;
 
-function findCellAt(row, col) {
-  return cells.find(c => c.row === row && c.col === col);
-}
+shuffleBtn.onclick=()=>{
 
-function triggerHero() {
-  if (heroActive) return;
-  const topRow = 1 + Math.floor(Math.random() * (GRID_SIZE - 1));
-  const topCol = 1 + Math.floor(Math.random() * (GRID_SIZE - 1));
-  const block = [
-    findCellAt(topRow, topCol),
-    findCellAt(topRow, topCol + 1),
-    findCellAt(topRow + 1, topCol),
-    findCellAt(topRow + 1, topCol + 1),
-  ];
-  if (block.some(c => !c || c.busy)) return; // skip if a cell is missing OR already mid-transition — grabbing a busy cell caused the intermittent blank-tile bug
+  recompose();
 
-  heroActive = true;
-  const [heroCell, ...hidden] = block;
+  if(!paused){
+    start();
+  }
+};
 
-  block.forEach(c => { c.busy = true; c.frozen = true; }); // freeze all four during the hero period
-  heroCell.isHero = true;
-  heroCell.el.classList.add("hero");
-  heroCell.el.style.gridRow = `${topRow} / span 2`;
-  heroCell.el.style.gridColumn = `${topCol} / span 2`;
-  hidden.forEach(c => { c.el.style.display = "none"; });
 
-  setTimeout(() => {
-    heroCell.isHero = false;
-    heroCell.el.classList.remove("hero");
-    applyGridPos(heroCell);
-    hidden.forEach(c => { c.el.style.display = ""; });
-    block.forEach(c => { c.busy = false; c.frozen = false; });
-    heroActive = false;
-  }, HERO_DURATION);
-}
+pauseBtn.onclick=()=>{
 
-/* ---------- TIMERS (jittered so the rhythm feels organic, not mechanical) ---------- */
-function scheduleSwap() {
-  setTimeout(() => {
-    for (let i = 0; i < SWAPS_PER_TICK; i++) swapRandomCell();
-    scheduleSwap();
-  }, jitter(SWAP_INTERVAL));
-}
+  paused=!paused;
 
-function scheduleShuffle() {
-  setTimeout(() => {
-    shufflePositions();
-    scheduleShuffle();
-  }, jitter(SHUFFLE_EVERY));
-}
+  pauseBtn.textContent=
+    paused ? "play" : "pause";
 
-function scheduleHero() {
-  setTimeout(() => {
-    triggerHero();
-    scheduleHero();
-  }, jitter(HERO_INTERVAL));
-}
+  if(paused){
+    clearInterval(timer);
+  }else{
+    start();
+  }
+};
 
-scheduleSwap();
-scheduleShuffle();
-scheduleHero();
+
+document.addEventListener(
+  "visibilitychange",
+  ()=>{
+    if(document.hidden){
+      clearInterval(timer);
+    }else if(!paused){
+      start();
+    }
+  }
+);
+
+
+initial();
+start();
 </script>
 
 </body>
 </html>
+
