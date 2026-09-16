@@ -1,7 +1,7 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ukraine@war</title>
 <style>
@@ -10,25 +10,22 @@
 html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--paper);color:var(--ink)}
 body{font-family:Georgia,"Times New Roman",serif}
 .page{position:relative;width:100vw;height:100vh}
-
 .masthead{position:absolute;z-index:100;top:22px;left:24px}
 .title{margin:0;font-size:clamp(34px,3vw,52px);font-weight:400;line-height:.9;letter-spacing:-.055em}
 .subtitle{margin-top:9px;font:9px Arial,sans-serif;letter-spacing:.1em;text-transform:uppercase}
 .credit{position:absolute;z-index:100;top:22px;right:22px;font:9px Arial,sans-serif;letter-spacing:.13em;text-transform:uppercase;writing-mode:vertical-rl;transform:rotate(180deg)}
-
 .wall-wrap{position:absolute;z-index:5;left:50%;top:51%;transform:translate(-50%,-50%);width:min(calc(100vw - 48px),calc(100vh - 185px));aspect-ratio:1}
-.wall{width:100%;height:100%;display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);gap:var(--gap)}
+.wall{width:100%;height:100%;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));grid-template-rows:repeat(8,minmax(0,1fr));gap:var(--gap)}
 .tile{position:relative;overflow:hidden;background:#111;min-width:0;min-height:0}
-.tile img{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:cover;will-change:opacity,transform}
+.tile img{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:cover}
 .tile .a{z-index:1;opacity:1}
 .tile .b{z-index:2;opacity:0}
-.tile.dissolve .b{opacity:1}
-.tile img{transition:opacity 1.35s ease,transform 6s cubic-bezier(.22,.61,.36,1)}
-.tile.breathe .a{transform:scale(1.012)}
-.tile.breathe .b{transform:scale(1.012)}
-.tile.move .a,.tile.move .b{transform:scale(1.018)}
+.tile.swap .b{opacity:1}
+.tile img{transition:opacity 1100ms cubic-bezier(.22,.61,.36,1),transform 6500ms cubic-bezier(.22,.61,.36,1)}
+.tile.lift .a,.tile.lift .b{transform:scale(1.014)}
+.tile.lift2 .a,.tile.lift2 .b{transform:scale(1.022)}
 
-.hero{position:fixed;z-index:80;display:none;width:var(--hero-size);height:var(--hero-size);overflow:hidden;opacity:0;transform:scale(.94);transition:opacity 1.2s ease,transform 1.2s ease;pointer-events:none;box-shadow:0 0 0 1px rgba(0,0,0,.18)}
+.hero{position:fixed;z-index:80;display:none;overflow:hidden;opacity:0;transform:scale(.92);transition:opacity 900ms ease,transform 1100ms cubic-bezier(.22,.61,.36,1);pointer-events:none;box-shadow:0 0 0 1px rgba(0,0,0,.22);background:#111}
 .hero img{width:100%;height:100%;display:block;object-fit:cover}
 .hero.show{opacity:1;transform:scale(1)}
 
@@ -37,8 +34,7 @@ body{font-family:Georgia,"Times New Roman",serif}
 .subscribe{color:var(--ink);font-size:14px;text-decoration:none;border-bottom:1px solid rgba(0,0,0,.4);padding-bottom:2px}
 .footer-right{position:absolute;z-index:100;right:24px;bottom:23px;display:flex;align-items:center;gap:19px;font:9px Arial,sans-serif;letter-spacing:.12em;text-transform:uppercase}
 .counter{display:flex;align-items:center;gap:9px}.counter-line{width:20px;height:1px;background:rgba(0,0,0,.45)}
-button{border:0;background:none;color:var(--ink);padding:0;font:inherit;cursor:pointer}
-button:hover{opacity:.5}
+button{border:0;background:none;color:var(--ink);padding:0;font:inherit;cursor:pointer}button:hover{opacity:.5}
 
 .intro{position:fixed;z-index:1000;inset:0;background:var(--paper);display:flex;align-items:center;justify-content:center;pointer-events:none;animation:introout .9s ease 1.1s forwards}
 .intro-text{font-size:clamp(38px,6vw,90px);letter-spacing:-.055em;animation:introin .7s ease both}
@@ -55,209 +51,134 @@ button:hover{opacity:.5}
 <body>
 <div class="page">
   <div class="intro"><div class="intro-text">ukraine@war</div></div>
-
-  <header class="masthead">
-    <h1 class="title">ukraine@war</h1>
-    <div class="subtitle">67 images / living wall</div>
-  </header>
-
+  <header class="masthead"><h1 class="title">ukraine@war</h1><div class="subtitle">67 images / living wall</div></header>
   <div class="credit">drone dept. / 2026</div>
-
   <div class="wall-wrap"><main id="wall" class="wall"></main></div>
   <div id="hero" class="hero"><img id="heroImg" alt=""></div>
-
-  <div class="footer-left">
-    <div class="footer-label">The Daily Dispatch</div>
-    <a class="subscribe" href="https://abdymok.substack.com/" target="_blank" rel="noopener">Read &amp; subscribe on Substack →</a>
-  </div>
-
-  <div class="footer-right">
-    <div class="counter"><span id="counter">01</span><span class="counter-line"></span></div>
-    <button id="recompose">Recompose</button>
-    <button id="pause">Pause</button>
-  </div>
+  <div class="footer-left"><div class="footer-label">The Daily Dispatch</div><a class="subscribe" href="https://abdymok.substack.com/" target="_blank" rel="noopener">Read &amp; subscribe on Substack →</a></div>
+  <div class="footer-right"><div class="counter"><span id="counter">01</span><span class="counter-line"></span></div><button id="recompose">Recompose</button><button id="pause">Pause</button></div>
 </div>
-
 <script>
-/* EXACTLY the 67 files in the repository. */
+// The repository contains these exact 67 images: 1.jfif–6.jfif and 7.jpg–67.jpg.
 const FILES=["1.jfif","2.jfif","3.jfif","4.jfif","5.jfif","6.jfif"];
-for(let n=7;n<=67;n++) FILES.push(n+".jpg");
+for(let i=7;i<=67;i++) FILES.push(i+".jpg");
 
 const wall=document.getElementById("wall");
 const counter=document.getElementById("counter");
-const pauseButton=document.getElementById("pause");
+const pauseBtn=document.getElementById("pause");
 const hero=document.getElementById("hero");
 const heroImg=document.getElementById("heroImg");
-
-let order=shuffle(FILES).slice(0,64);
 let tiles=[];
-let paused=false;
+let order=[];
 let round=0;
-let heroTimer=null;
+let paused=false;
+let heroTimeout=0;
+let timerA=0,timerB=0;
 
 function shuffle(a){
   const b=a.slice();
-  for(let i=b.length-1;i>0;i--){
-    const j=Math.floor(Math.random()*(i+1));
-    [b[i],b[j]]=[b[j],b[i]];
-  }
+  for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]]}
   return b;
 }
 
 function build(){
-  wall.innerHTML="";
-  tiles=[];
-  for(let i=0;i<64;i++){
-    const tile=document.createElement("div");
-    tile.className="tile";
-
-    const a=document.createElement("img");
-    const b=document.createElement("img");
-    a.className="a"; b.className="b";
-    a.src=order[i];
-
-    tile.appendChild(a);
-    tile.appendChild(b);
-    wall.appendChild(tile);
-    tiles.push(tile);
-  }
+  order=shuffle(FILES).slice(0,64);
+  wall.replaceChildren(); tiles=[];
+  order.forEach(src=>{
+    const tile=document.createElement("div"); tile.className="tile";
+    const a=document.createElement("img"); a.className="a"; a.src=src;
+    const b=document.createElement("img"); b.className="b"; b.alt="";
+    tile.append(a,b); wall.append(tile); tiles.push(tile);
+  });
 }
 
-/* Preload every source. This makes later dissolves deterministic. */
-const cache=new Map();
-for(const src of FILES){
-  const im=new Image();
-  im.src=src;
-  cache.set(src,im);
-}
-
-function setImage(tile,src){
-  const a=tile.querySelector(".a");
-  const b=tile.querySelector(".b");
-
-  /*
-    Use the already-loaded browser image cache, then fade.
-    No empty state is ever exposed.
-  */
-  b.src=src;
-
-  /* Force the browser to see the new opacity state. */
-  void b.offsetWidth;
-  tile.classList.add("dissolve","move");
-
-  window.setTimeout(()=>{
-    a.src=src;
-    tile.classList.remove("dissolve");
-    b.src="";
-  },1450);
-
-  window.setTimeout(()=>tile.classList.remove("move"),6200);
+function swapTile(index,src,delay){
+  const tile=tiles[index];
+  if(!tile || src===order[index]) return;
+  setTimeout(()=>{
+    if(paused) return;
+    const a=tile.querySelector(".a"), b=tile.querySelector(".b");
+    b.src=src;
+    // Two frames guarantees the new image is painted before the dissolve starts.
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      if(paused)return;
+      tile.classList.add("swap","lift2");
+      setTimeout(()=>{
+        if(paused)return;
+        a.src=src;
+        tile.classList.remove("swap");
+        b.removeAttribute("src");
+        order[index]=src;
+      },1150);
+      setTimeout(()=>tile.classList.remove("lift2"),6400);
+    }));
+  },delay);
 }
 
 function recompose(){
   if(paused)return;
-
   round++;
   counter.textContent=String(((round-1)%99)+1).padStart(2,"0");
 
-  /*
-    10 cells participate. Their images rotate.
-    One of the three currently off-wall images is introduced
-    roughly every other round.
-  */
-  const cells=shuffle([...Array(64).keys()]).slice(0,10);
-  const old=cells.map(i=>order[i]);
+  // 16 cells change on each pass. This is intentionally more visible than the previous version.
+  const cells=shuffle([...Array(64).keys()]).slice(0,16);
+  const current=cells.map(i=>order[i]);
+  let incoming=shuffle(current);
+  if(incoming.every((v,i)=>v===current[i])) incoming=incoming.slice(1).concat(incoming[0]);
 
-  let next=shuffle(old);
-
-  /* Guarantee a non-trivial permutation. */
-  if(next.every((v,i)=>v===old[i])) next=next.slice(1).concat(next[0]);
-
+  // Keep exactly 64 occupied cells, while cycling the 3 off-wall images through the wall.
   const off=FILES.filter(f=>!order.includes(f));
-  if(off.length && round%2===0){
-    const k=Math.floor(Math.random()*next.length);
-    next[k]=off[Math.floor(Math.random()*off.length)];
-  }
+  if(off.length){incoming[0]=off[(round-1)%off.length]}
 
-  cells.forEach((cell,i)=>{
-    const src=next[i];
-    if(src===order[cell])return;
-    order[cell]=src;
-    setTimeout(()=>{if(!paused)setImage(tiles[cell],src)},i*100);
-  });
+  cells.forEach((cell,i)=>swapTile(cell,incoming[i],i*85));
 
-  /* The tiny "breathing" motion happens between recompositions too. */
+  // Very slow, barely perceptible breathing across the wall.
   tiles.forEach((tile,i)=>{
-    tile.classList.remove("breathe");
-    setTimeout(()=>{if(!paused)tile.classList.add("breathe")},(i%8)*55);
+    tile.classList.remove("lift");
+    setTimeout(()=>{if(!paused)tile.classList.add("lift")},(i%8)*70);
   });
 
-  /* Hero every third shuffle. */
-  if(round%3===0){
-    setTimeout(()=>{if(!paused)showHero()},1800);
-  }
+  // A square 2×2-cell hero, occasionally — never rectangular.
+  if(round%3===0) setTimeout(()=>{if(!paused)showHero()},1800);
 }
 
 function showHero(){
   if(hero.classList.contains("show"))return;
-
   const r=wall.getBoundingClientRect();
   const gap=parseFloat(getComputedStyle(wall).gap)||5;
   const cell=(r.width-gap*7)/8;
   const size=cell*2+gap;
-
-  const src=order[Math.floor(Math.random()*order.length)];
-  heroImg.src=src;
-
-  /* Align hero exactly to the 8x8 geometry. */
-  const col=Math.floor(Math.random()*7);
-  const row=Math.floor(Math.random()*7);
-  const x=r.left+col*(cell+gap);
-  const y=r.top+row*(cell+gap);
-
-  hero.style.setProperty("--hero-size",size+"px");
-  hero.style.left=x+"px";
-  hero.style.top=y+"px";
+  hero.style.width=size+"px";
+  hero.style.height=size+"px";
+  hero.style.left=(r.left+Math.floor(Math.random()*7)*(cell+gap))+"px";
+  hero.style.top=(r.top+Math.floor(Math.random()*7)*(cell+gap))+"px";
+  heroImg.src=order[Math.floor(Math.random()*order.length)];
   hero.style.display="block";
-
   requestAnimationFrame(()=>hero.classList.add("show"));
-
-  clearTimeout(heroTimer);
-  heroTimer=setTimeout(hideHero,6200);
+  clearTimeout(heroTimeout);
+  heroTimeout=setTimeout(hideHero,5600);
 }
-
 function hideHero(){
   hero.classList.remove("show");
-  setTimeout(()=>{if(!hero.classList.contains("show"))hero.style.display="none"},1200);
+  clearTimeout(heroTimeout);
+  heroTimeout=setTimeout(()=>{if(!hero.classList.contains("show"))hero.style.display="none"},950);
 }
-
 function togglePause(){
   paused=!paused;
-  pauseButton.textContent=paused?"Play":"Pause";
+  pauseBtn.textContent=paused?"Play":"Pause";
   if(paused)hideHero();
 }
 
-/* Manual test button. */
-document.getElementById("recompose").onclick=recompose;
-pauseButton.onclick=togglePause;
-
 build();
+document.getElementById("recompose").addEventListener("click",recompose);
+pauseBtn.addEventListener("click",togglePause);
 
-/*
-  IMPORTANT:
-  The first change happens after 2.5 seconds.
-  Then every 7 seconds.
-  This is deliberately obvious during testing.
-*/
-setTimeout(()=>{if(!paused)recompose()},2500);
-setInterval(()=>{if(!paused)recompose()},7000);
-
-/* Hero also appears independently from time to time. */
-setInterval(()=>{
-  if(!paused && round>0 && Math.random()<.30)showHero();
-},11000);
-
-window.addEventListener("resize",()=>hideHero());
+// Deterministic heartbeat: first change at 2 seconds, then every 5 seconds.
+timerA=setTimeout(()=>recompose(),2000);
+timerB=setInterval(()=>recompose(),5000);
+// Independent hero heartbeat, so the hero does not depend on a successful shuffle round.
+setInterval(()=>{if(!paused && Math.random()<0.45)showHero()},9000);
+window.addEventListener("resize",hideHero);
 </script>
 </body>
 </html>
