@@ -3,14 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <title>ukraine@war — living wall</title>
 
   <style>
     :root {
       --paper: #f3f1eb;
       --ink: #111;
-      --line: rgba(0, 0, 0, 0.45);
+      --gap: 4px;
     }
 
     * {
@@ -31,10 +30,6 @@
       font-family: Georgia, "Times New Roman", serif;
     }
 
-    /* --------------------------------------------------
-       PAGE
-    -------------------------------------------------- */
-
     .page {
       position: relative;
       width: 100vw;
@@ -42,48 +37,43 @@
       overflow: hidden;
     }
 
-    /* --------------------------------------------------
+    /* ---------------------------------------------
        HEADER
-    -------------------------------------------------- */
+    --------------------------------------------- */
 
     .masthead {
       position: absolute;
       z-index: 100;
-      top: 24px;
+      top: 22px;
       left: 24px;
       pointer-events: none;
     }
 
     .title {
       margin: 0;
-      font-size: clamp(30px, 3vw, 52px);
-      line-height: 0.9;
+      font-size: clamp(32px, 3.1vw, 54px);
+      line-height: .9;
       font-weight: normal;
-      letter-spacing: -0.055em;
+      letter-spacing: -.055em;
     }
 
     .subtitle {
-      margin-top: 10px;
+      margin-top: 9px;
       font-family: Arial, Helvetica, sans-serif;
-      font-size: 10px;
-      line-height: 1;
-      letter-spacing: 0.08em;
+      font-size: 9px;
+      letter-spacing: .08em;
       text-transform: uppercase;
     }
-
-    /* --------------------------------------------------
-       CREDIT
-    -------------------------------------------------- */
 
     .credit {
       position: absolute;
       z-index: 100;
-      top: 24px;
-      right: 24px;
+      top: 22px;
+      right: 23px;
 
       font-family: Arial, Helvetica, sans-serif;
       font-size: 9px;
-      letter-spacing: 0.13em;
+      letter-spacing: .13em;
       text-transform: uppercase;
 
       writing-mode: vertical-rl;
@@ -92,59 +82,68 @@
       pointer-events: none;
     }
 
-    /* --------------------------------------------------
-       IMAGE WALL
-    -------------------------------------------------- */
+    /* ---------------------------------------------
+       WALL
+
+       67 actual image tiles.
+
+       The grid deliberately does NOT create 70
+       placeholder cells. It simply lays out the
+       67 images that actually exist.
+    --------------------------------------------- */
 
     .wall {
       position: absolute;
 
-      /*
-        Leave space for the masthead above and controls
-        below. This is what prevents the images from
-        covering the title.
-      */
-      top: 82px;
+      top: 80px;
       right: 24px;
-      bottom: 94px;
+      bottom: 91px;
       left: 24px;
 
       display: grid;
 
       /*
-        10 columns × 7 rows = 70 positions.
-        67 images means 3 positions remain empty.
+        Eight columns gives the images room to breathe
+        while allowing 67 genuine tiles to occupy the
+        available wall without explicit empty squares.
       */
-      grid-template-columns: repeat(10, minmax(0, 1fr));
-      grid-template-rows: repeat(7, minmax(0, 1fr));
+      grid-template-columns: repeat(8, minmax(0, 1fr));
 
-      gap: 5px;
+      grid-auto-rows: 1fr;
+
+      gap: var(--gap);
+
+      align-content: start;
 
       z-index: 10;
     }
 
     .tile {
       position: relative;
+
+      /*
+        Every tile is square.
+      */
+      aspect-ratio: 1 / 1;
+
       min-width: 0;
-      min-height: 0;
 
       overflow: hidden;
-      background: #ddd;
 
       opacity: 0;
 
       transform:
         translate3d(
-          var(--x, 0px),
-          var(--y, 0px),
+          var(--tx, 0px),
+          var(--ty, 0px),
           0
         )
-        rotate(var(--r, 0deg))
-        scale(var(--s, 1));
+        rotate(var(--rot, 0deg))
+        scale(var(--scale, 1));
 
       transition:
-        opacity 1.4s ease,
-        transform 7s cubic-bezier(.2, .7, .2, 1);
+        opacity 1.6s ease,
+        transform 7s cubic-bezier(.2, .65, .2, 1);
 
       will-change: transform, opacity;
     }
@@ -159,33 +158,60 @@
       width: 100%;
       height: 100%;
 
+      /*
+        The container remains square.
+        The source image itself is NEVER stretched.
+      */
       object-fit: cover;
 
       user-select: none;
       -webkit-user-drag: none;
 
+      transition:
+        opacity 2.4s ease;
+    }
+
+    /* ---------------------------------------------
+       HERO
+
+       A hero is simply one of the existing images
+       displayed as a larger square.
+
+       It does NOT introduce another image.
+    --------------------------------------------- */
+
+    .tile.hero {
+      z-index: 30;
+
       /*
-        Slightly reduce the harshness of the images
-        against the paper background.
+        2×2 square.
       */
-      filter: contrast(0.98);
+      grid-column: span 2;
+      grid-row: span 2;
+
+      transform:
+        translate3d(
+          var(--tx, 0px),
+          var(--ty, 0px),
+          0
+        )
+        rotate(var(--rot, 0deg))
+        scale(var(--scale, 1));
     }
 
-    /* Empty slots */
-    .empty {
-      background: transparent;
+    .tile.hero img {
+      object-fit: cover;
     }
 
-    /* --------------------------------------------------
+    /* ---------------------------------------------
        FOOTER
-    -------------------------------------------------- */
+    --------------------------------------------- */
 
     .footer-left {
       position: absolute;
       z-index: 100;
-
       left: 24px;
-      bottom: 24px;
+      bottom: 22px;
     }
 
     .footer-label {
@@ -193,7 +219,7 @@
 
       font-family: Arial, Helvetica, sans-serif;
       font-size: 9px;
-      letter-spacing: 0.14em;
+      letter-spacing: .14em;
       text-transform: uppercase;
     }
 
@@ -206,7 +232,7 @@
       font-size: 14px;
       line-height: 1.2;
 
-      border-bottom: 1px solid var(--line);
+      border-bottom: 1px solid rgba(0, 0, 0, .4);
       padding-bottom: 2px;
     }
 
@@ -219,15 +245,15 @@
       z-index: 100;
 
       right: 24px;
-      bottom: 25px;
+      bottom: 23px;
 
       display: flex;
       align-items: center;
-      gap: 20px;
+      gap: 19px;
 
       font-family: Arial, Helvetica, sans-serif;
       font-size: 9px;
-      letter-spacing: 0.12em;
+      letter-spacing: .12em;
       text-transform: uppercase;
     }
 
@@ -240,33 +266,29 @@
     .counter-line {
       width: 20px;
       height: 1px;
-      background: var(--line);
+      background: rgba(0, 0, 0, .45);
     }
 
     button {
       appearance: none;
       border: 0;
-      padding: 0;
       margin: 0;
+      padding: 0;
 
       background: transparent;
       color: var(--ink);
 
-      font-family: Arial, Helvetica, sans-serif;
-      font-size: 9px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-
+      font: inherit;
       cursor: pointer;
     }
 
     button:hover {
-      opacity: 0.55;
+      opacity: .5;
     }
 
-    /* --------------------------------------------------
+    /* ---------------------------------------------
        INTRO
-    -------------------------------------------------- */
+    --------------------------------------------- */
 
     .intro {
       position: fixed;
@@ -281,23 +303,24 @@
 
       pointer-events: none;
 
-      animation: introOut 1.1s ease 1.1s forwards;
+      animation: introOut 1.2s ease 1.2s forwards;
     }
 
     .intro-text {
-      font-size: clamp(34px, 6vw, 90px);
-      letter-spacing: -0.055em;
+      font-size: clamp(35px, 6vw, 90px);
+      letter-spacing: -.055em;
+
       opacity: 0;
 
       animation:
-        introIn 0.8s ease 0.15s forwards,
-        introTextOut 0.7s ease 0.8s forwards;
+        introIn .8s ease .1s forwards,
+        introTextOut .7s ease .85s forwards;
     }
 
     @keyframes introIn {
       from {
         opacity: 0;
-        transform: translateY(12px);
+        transform: translateY(10px);
       }
 
       to {
@@ -326,15 +349,15 @@
       }
     }
 
-    /* --------------------------------------------------
+    /* ---------------------------------------------
        MOBILE
-    -------------------------------------------------- */
+    --------------------------------------------- */
 
     @media (max-width: 700px) {
 
       .masthead {
-        top: 16px;
-        left: 16px;
+        top: 15px;
+        left: 15px;
       }
 
       .title {
@@ -347,31 +370,35 @@
       }
 
       .credit {
-        top: 16px;
-        right: 16px;
+        top: 15px;
+        right: 15px;
         font-size: 8px;
       }
 
       .wall {
-        top: 70px;
+        top: 67px;
         right: 12px;
-        bottom: 88px;
+        bottom: 82px;
         left: 12px;
 
         grid-template-columns: repeat(5, minmax(0, 1fr));
-        grid-template-rows: repeat(14, minmax(0, 1fr));
 
         gap: 3px;
       }
 
+      .tile.hero {
+        grid-column: span 2;
+        grid-row: span 2;
+      }
+
       .footer-left {
-        left: 16px;
-        bottom: 17px;
+        left: 15px;
+        bottom: 15px;
       }
 
       .footer-right {
-        right: 16px;
-        bottom: 18px;
+        right: 15px;
+        bottom: 16px;
         gap: 12px;
       }
 
@@ -380,54 +407,53 @@
       }
     }
 
-    /* --------------------------------------------------
+    /* ---------------------------------------------
        REDUCED MOTION
-    -------------------------------------------------- */
+    --------------------------------------------- */
 
     @media (prefers-reduced-motion: reduce) {
 
-      .tile {
-        transition: opacity 0.3s ease;
-        transform: none !important;
-      }
-
-      .intro,
-      .intro-text {
-        animation: none;
-      }
-
       .intro {
         display: none;
+      }
+
+      .tile,
+      .tile.hero {
+        transition: opacity .3s ease;
+        transform: none !important;
       }
     }
   </style>
 </head>
 
+
 <body>
 
   <div class="page">
 
-    <!-- INTRO -->
     <div class="intro" aria-hidden="true">
       <div class="intro-text">ukraine@war</div>
     </div>
 
-    <!-- HEADER -->
+
     <header class="masthead">
       <h1 class="title">ukraine@war</h1>
       <div class="subtitle">67 images / living wall</div>
     </header>
 
-    <!-- CREDIT -->
+
     <div class="credit">
       drone dept. / 2026
     </div>
 
-    <!-- IMAGE WALL -->
-    <main class="wall" id="wall" aria-label="Ukraine at war — living wall">
-    </main>
 
-    <!-- FOOTER LEFT -->
+    <main
+      class="wall"
+      id="wall"
+      aria-label="Ukraine at war — living wall"
+    ></main>
+
+
     <div class="footer-left">
       <div class="footer-label">
         The Daily Dispatch
@@ -443,11 +469,11 @@
       </a>
     </div>
 
-    <!-- FOOTER RIGHT -->
+
     <div class="footer-right">
 
       <div class="counter">
-        <span id="counter">00</span>
+        <span id="counter">01</span>
         <span class="counter-line"></span>
       </div>
 
@@ -465,19 +491,10 @@
 
 
   <script>
-    /* ==================================================
-       IMAGE LIST
 
-       These are the ACTUAL filenames in your repository:
-
-       1.jfif
-       2.jfif
-       3.jfif
-       4.jfif
-       5.jfif
-       6.jfif
-       7.jpg ... 67.jpg
-    ================================================== */
+    /* =================================================
+       THE ONLY IMAGES USED BY THIS SITE
+       ================================================= */
 
     const files = [
       "1.jfif",
@@ -493,233 +510,378 @@
     }
 
 
-    /* ==================================================
-       SETTINGS
-    ================================================== */
+    /* =================================================
+       STATE
+       ================================================= */
 
     const wall = document.getElementById("wall");
     const counter = document.getElementById("counter");
     const recomposeButton = document.getElementById("recompose");
     const pauseButton = document.getElementById("pause");
 
-    const TOTAL_SLOTS = 70;
-    const TOTAL_IMAGES = files.length;
+    const TOTAL = files.length;
 
     let tiles = [];
     let paused = false;
-    let cycle = 0;
+    let composition = 0;
+
+    let heroIndex = null;
 
 
-    /* ==================================================
-       HELPERS
-    ================================================== */
+    /* =================================================
+       RANDOM HELPERS
+       ================================================= */
 
     function random(min, max) {
       return Math.random() * (max - min) + min;
     }
 
-    function shuffle(array) {
-      const copy = [...array];
 
-      for (let i = copy.length - 1; i > 0; i--) {
+    function shuffle(array) {
+      const a = [...array];
+
+      for (let i = a.length - 1; i > 0; i--) {
+
         const j = Math.floor(Math.random() * (i + 1));
 
-        [copy[i], copy[j]] = [copy[j], copy[i]];
+        [a[i], a[j]] = [a[j], a[i]];
       }
 
-      return copy;
+      return a;
     }
 
 
-    /* ==================================================
-       CREATE WALL
-    ================================================== */
+    /* =================================================
+       CREATE THE 67 REAL IMAGE TILES
+       ================================================= */
 
     function createWall() {
 
       wall.innerHTML = "";
       tiles = [];
 
-      /*
-        70 grid slots.
-        First 67 receive images.
-        Last 3 remain empty.
-      */
-
-      const order = shuffle(
-        Array.from(
-          { length: TOTAL_SLOTS },
-          (_, i) => i
-        )
-      );
-
-      const imageSlots = order.slice(0, TOTAL_IMAGES);
-
       files.forEach((file, index) => {
 
         const tile = document.createElement("div");
+
         tile.className = "tile";
 
         const img = document.createElement("img");
 
         img.src = file;
-        img.alt = `Ukraine at war — image ${index + 1}`;
-        img.loading = index < 12 ? "eager" : "lazy";
+
+        img.alt =
+          `Ukraine at war — image ${index + 1}`;
+
+        img.loading =
+          index < 16 ? "eager" : "lazy";
+
         img.decoding = "async";
 
         /*
-          If an image cannot load, hide the broken tile
-          instead of displaying a broken-image icon.
+          Broken images are hidden rather than replaced
+          with anything invented.
         */
         img.addEventListener("error", () => {
+
           tile.style.display = "none";
+
         });
 
         tile.appendChild(img);
 
-        /*
-          Place image into a randomly selected grid slot.
-        */
-        tile.style.gridColumn =
-          (imageSlots[index] % 10) + 1;
-
-        tile.style.gridRow =
-          Math.floor(imageSlots[index] / 10) + 1;
-
-        /*
-          Very subtle initial variation.
-        */
-        tile.style.setProperty(
-          "--x",
-          `${random(-3, 3).toFixed(1)}px`
-        );
-
-        tile.style.setProperty(
-          "--y",
-          `${random(-3, 3).toFixed(1)}px`
-        );
-
-        tile.style.setProperty(
-          "--r",
-          `${random(-0.7, 0.7).toFixed(2)}deg`
-        );
-
-        tile.style.setProperty(
-          "--s",
-          random(0.99, 1.01).toFixed(3)
-        );
-
         wall.appendChild(tile);
+
         tiles.push(tile);
 
       });
 
 
       /*
-        Fade the wall in after the DOM has been created.
+        Fade the actual 67 images in one by one.
       */
+
       requestAnimationFrame(() => {
 
         tiles.forEach((tile, index) => {
 
           setTimeout(() => {
+
             tile.classList.add("visible");
-          }, index * 22);
+
+          }, index * 28);
 
         });
 
       });
 
       updateCounter();
+
+      /*
+        Start the first very quiet breathing cycle.
+      */
+      breathe();
+
     }
 
 
-    /* ==================================================
-       RECOMPOSE
+    /* =================================================
+       BREATHING
 
-       Instead of moving images through complicated
-       absolute positioning, we simply redistribute the
-       67 tiles through the 70 available grid positions.
+       Extremely small movement.
+       The wall should feel alive, not animated.
+       ================================================= */
 
-       This is much more reliable on GitHub Pages.
-    ================================================== */
+    function breathe() {
 
-    function recompose() {
-
-      if (paused || tiles.length === 0) {
+      if (paused) {
         return;
       }
 
-      cycle++;
+      tiles.forEach(tile => {
 
-      const positions = shuffle(
-        Array.from(
-          { length: TOTAL_SLOTS },
-          (_, i) => i
-        )
-      );
+        if (tile.style.display === "none") {
+          return;
+        }
 
-      /*
-        Only 67 of the 70 positions are used.
-      */
-
-      tiles.forEach((tile, index) => {
-
-        const position = positions[index];
-
-        tile.style.gridColumn =
-          (position % 10) + 1;
-
-        tile.style.gridRow =
-          Math.floor(position / 10) + 1;
-
-        /*
-          Subtle movement makes the composition feel alive
-          without throwing the images across the screen.
-        */
+        const x = random(-1.8, 1.8);
+        const y = random(-1.8, 1.8);
+        const r = random(-0.22, 0.22);
+        const s = random(.997, 1.003);
 
         tile.style.setProperty(
-          "--x",
-          `${random(-5, 5).toFixed(1)}px`
+          "--tx",
+          `${x.toFixed(2)}px`
         );
 
         tile.style.setProperty(
-          "--y",
-          `${random(-5, 5).toFixed(1)}px`
+          "--ty",
+          `${y.toFixed(2)}px`
         );
 
         tile.style.setProperty(
-          "--r",
-          `${random(-1.2, 1.2).toFixed(2)}deg`
+          "--rot",
+          `${r.toFixed(2)}deg`
         );
 
         tile.style.setProperty(
-          "--s",
-          random(0.985, 1.015).toFixed(3)
+          "--scale",
+          s.toFixed(4)
         );
 
       });
 
-      updateCounter();
     }
 
 
-    /* ==================================================
+    /* =================================================
+       HERO
+
+       One of the existing 67 images becomes a 2×2
+       square temporarily.
+
+       We NEVER create a new image.
+       ================================================= */
+
+    function chooseHero() {
+
+      if (tiles.length === 0) {
+        return;
+      }
+
+      /*
+        Remove previous hero.
+      */
+
+      tiles.forEach(tile => {
+
+        tile.classList.remove("hero");
+
+      });
+
+
+      /*
+        Choose a different existing image.
+      */
+
+      let next;
+
+      do {
+
+        next =
+          Math.floor(
+            Math.random() * tiles.length
+          );
+
+      } while (
+        tiles.length > 1 &&
+        next === heroIndex
+      );
+
+
+      heroIndex = next;
+
+      const hero = tiles[heroIndex];
+
+      hero.classList.add("hero");
+
+      /*
+        Very subtle emergence.
+      */
+
+      hero.style.setProperty(
+        "--scale",
+        "0.985"
+      );
+
+      setTimeout(() => {
+
+        if (!paused) {
+
+          hero.style.setProperty(
+            "--scale",
+            "1"
+          );
+
+        }
+
+      }, 300);
+
+    }
+
+
+    /* =================================================
+       DISSOLVE
+
+       The image itself doesn't change.
+
+       We use opacity to let the composition settle
+       softly after a shuffle.
+       ================================================= */
+
+    function dissolve() {
+
+      tiles.forEach(tile => {
+
+        if (tile.style.display === "none") {
+          return;
+        }
+
+        tile.style.transition =
+          "opacity 2.8s ease, transform 7s cubic-bezier(.2,.65,.2,1)";
+
+        tile.style.opacity = "0.55";
+
+      });
+
+
+      setTimeout(() => {
+
+        tiles.forEach(tile => {
+
+          if (tile.style.display === "none") {
+            return;
+          }
+
+          tile.style.opacity = "";
+
+        });
+
+      }, 1200);
+
+    }
+
+
+    /* =================================================
+       SHUFFLE
+
+       We shuffle the actual 67 tiles.
+
+       No replacement images.
+       No generated images.
+       No new content.
+       ================================================= */
+
+    function recompose() {
+
+      if (paused) {
+        return;
+      }
+
+      composition++;
+
+      /*
+        Shuffle DOM order.
+        The browser then repacks the same 67 images.
+      */
+
+      const order = shuffle(tiles);
+
+      order.forEach(tile => {
+
+        wall.appendChild(tile);
+
+      });
+
+
+      /*
+        Occasionally change which existing image
+        becomes the hero.
+
+        Not every cycle.
+        Restraint.
+      */
+
+      if (
+        composition % 3 === 0
+      ) {
+
+        chooseHero();
+
+      }
+      else if (
+        composition % 5 === 0
+      ) {
+
+        tiles.forEach(tile => {
+
+          tile.classList.remove("hero");
+
+        });
+
+        heroIndex = null;
+
+      }
+
+
+      dissolve();
+
+      breathe();
+
+      updateCounter();
+
+    }
+
+
+    /* =================================================
        COUNTER
-    ================================================== */
+       ================================================= */
 
     function updateCounter() {
 
-      const number =
-        String((cycle + 1) % 100).padStart(2, "0");
+      const n =
+        String(
+          (composition + 1) % 100
+        ).padStart(2, "0");
 
-      counter.textContent = number;
+      counter.textContent = n;
+
     }
 
 
-    /* ==================================================
+    /* =================================================
        PAUSE
-    ================================================== */
+       ================================================= */
 
     function togglePause() {
 
@@ -728,31 +890,37 @@
       pauseButton.textContent =
         paused ? "Play" : "Pause";
 
+      if (!paused) {
+
+        breathe();
+
+      }
+
     }
 
 
-    /* ==================================================
+    /* =================================================
        BUTTONS
-    ================================================== */
+       ================================================= */
 
     recomposeButton.addEventListener(
       "click",
       () => {
 
-        /*
-          Allow RECOMPOSE to work even when the automatic
-          animation is paused.
-        */
-
         const wasPaused = paused;
 
         paused = false;
+
         recompose();
 
         paused = wasPaused;
 
+        pauseButton.textContent =
+          paused ? "Play" : "Pause";
+
       }
     );
+
 
     pauseButton.addEventListener(
       "click",
@@ -760,11 +928,24 @@
     );
 
 
-    /* ==================================================
-       AUTOMATIC RECOMPOSITION
+    /* =================================================
+       SLOW AUTOMATIC BREATHING
+       ================================================= */
 
-       Every 8 seconds.
-    ================================================== */
+    setInterval(() => {
+
+      if (!paused) {
+        breathe();
+      }
+
+    }, 6500);
+
+
+    /* =================================================
+       OCCASIONAL RECOMPOSITION
+
+       Deliberately slow.
+       ================================================= */
 
     setInterval(() => {
 
@@ -772,12 +953,12 @@
         recompose();
       }
 
-    }, 8000);
+    }, 15000);
 
 
-    /* ==================================================
+    /* =================================================
        START
-    ================================================== */
+       ================================================= */
 
     createWall();
 
