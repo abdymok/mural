@@ -21,7 +21,7 @@ body{font-family:Georgia,"Times New Roman",serif}
 .tile .a{z-index:1;opacity:1}
 .tile .b{z-index:2;opacity:0}
 .tile.swap .b{opacity:1}
-.tile img{transition:opacity 1100ms cubic-bezier(.22,.61,.36,1),transform 6500ms cubic-bezier(.22,.61,.36,1)}
+.tile img{transition:opacity 1650ms ease-in-out,transform 6500ms cubic-bezier(.22,.61,.36,1)}
 .tile.lift .a,.tile.lift .b{transform:scale(1.014)}
 .tile.lift2 .a,.tile.lift2 .b{transform:scale(1.022)}
 
@@ -74,6 +74,13 @@ let round=0;
 let paused=false;
 let heroTimeout=0;
 let timerA=0,timerB=0;
+const imageCache=new Map();
+
+for(const src of FILES){
+  const im=new Image();
+  im.src=src;
+  imageCache.set(src,im);
+}
 
 function shuffle(a){
   const b=a.slice();
@@ -95,21 +102,44 @@ function build(){
 function swapTile(index,src,delay){
   const tile=tiles[index];
   if(!tile || src===order[index]) return;
-  setTimeout(()=>{
-    if(paused) return;
-    const a=tile.querySelector(".a"), b=tile.querySelector(".b");
+
+  setTimeout(async ()=>{
+    if(paused)return;
+
+    const a=tile.querySelector(".a");
+    const b=tile.querySelector(".b");
+    const cached=imageCache.get(src);
+
+    // Never begin the dissolve until the incoming image is actually decoded.
+    try{
+      if(cached){
+        if(cached.decode) await cached.decode();
+        else if(!cached.complete) await new Promise(resolve=>{
+          cached.addEventListener("load",resolve,{once:true});
+          cached.addEventListener("error",resolve,{once:true});
+        });
+      }
+    }catch(e){}
+
+    if(paused)return;
+
     b.src=src;
-    // Two frames guarantees the new image is painted before the dissolve starts.
+
+    // Let the browser paint the complete incoming frame first.
     requestAnimationFrame(()=>requestAnimationFrame(()=>{
       if(paused)return;
+
+      // Cross-dissolve: old image fades out as new image fades in.
       tile.classList.add("swap","lift2");
+
       setTimeout(()=>{
         if(paused)return;
         a.src=src;
-        tile.classList.remove("swap");
         b.removeAttribute("src");
+        tile.classList.remove("swap");
         order[index]=src;
-      },1150);
+      },1680);
+
       setTimeout(()=>tile.classList.remove("lift2"),6400);
     }));
   },delay);
