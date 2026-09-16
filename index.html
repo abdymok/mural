@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>ukraine@war — living wall</title>
 
 <style>
@@ -13,12 +12,9 @@
     --gap: 5px;
   }
 
-  * {
-    box-sizing: border-box;
-  }
+  * { box-sizing: border-box; }
 
-  html,
-  body {
+  html, body {
     width: 100%;
     height: 100%;
     margin: 0;
@@ -38,16 +34,13 @@
     overflow: hidden;
   }
 
-  /* ================================================
-     HEADER
-  ================================================ */
+  /* ---------------- HEADER ---------------- */
 
   .masthead {
     position: absolute;
     z-index: 100;
     top: 22px;
     left: 24px;
-    pointer-events: none;
   }
 
   .title {
@@ -60,7 +53,6 @@
 
   .subtitle {
     margin-top: 9px;
-
     font-family: Arial, Helvetica, sans-serif;
     font-size: 9px;
     letter-spacing: .09em;
@@ -70,86 +62,64 @@
   .credit {
     position: absolute;
     z-index: 100;
-
     top: 22px;
     right: 23px;
-
     font-family: Arial, Helvetica, sans-serif;
     font-size: 9px;
     letter-spacing: .13em;
     text-transform: uppercase;
-
     writing-mode: vertical-rl;
     transform: rotate(180deg);
-
-    pointer-events: none;
   }
 
+  /* ---------------- WALL ----------------
+     The wall is ALWAYS a true 8 x 8 square.
+     Tile size is calculated from the wall size,
+     never from a stretched row/column.
+  ------------------------------------------ */
 
-  /* ================================================
-     WALL
+  .wall-wrap {
+    position: absolute;
+    z-index: 10;
+    left: 50%;
+    top: 51%;
+    transform: translate(-50%, -50%);
 
-     8 × 8 = 64 square positions.
+    width: min(
+      calc(100vw - 48px),
+      calc(100vh - 190px)
+    );
 
-     The other 3 images become occasional heroes
-     and sit above this grid.
-  ================================================ */
+    aspect-ratio: 1 / 1;
+  }
 
   .wall {
-    position: absolute;
-
-    top: 104px;
-    left: 24px;
-    right: 24px;
-    bottom: 91px;
+    position: relative;
+    width: 100%;
+    height: 100%;
 
     display: grid;
-
-    grid-template-columns: repeat(8, minmax(0, 1fr));
-    grid-template-rows: repeat(8, minmax(0, 1fr));
-
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(8, 1fr);
     gap: var(--gap);
-
-    /*
-      This is important:
-      the grid itself is square in its logic, but the
-      individual image cells remain perfectly square.
-    */
-    align-content: start;
-
-    z-index: 10;
   }
-
-
-  /* ================================================
-     REGULAR TILE
-  ================================================ */
 
   .tile {
     position: relative;
-
-    width: 100%;
-    aspect-ratio: 1 / 1;
-
     min-width: 0;
     min-height: 0;
-
     overflow: hidden;
 
     opacity: 0;
 
+    /* Subtle breathing only. */
     transform:
-      translate3d(
-        var(--x, 0px),
-        var(--y, 0px),
-        0
-      )
-      rotate(var(--r, 0deg))
+      translate3d(var(--x, 0px), var(--y, 0px), 0)
       scale(var(--s, 1));
 
     transition:
-      opacity 1.8s ease,
-      transform 8s cubic-bezier(.2, .65, .2, 1);
+      opacity 1.7s ease,
+      transform 7s cubic-bezier(.22, .61, .36, 1);
 
     will-change: transform, opacity;
   }
@@ -158,108 +128,71 @@
     opacity: 1;
   }
 
-
-  /* ================================================
-     IMAGE
-
-     NEVER STRETCHED.
-     Every container is square.
-  ================================================ */
-
   .tile img {
     display: block;
-
     width: 100%;
     height: 100%;
-
     object-fit: cover;
-
+    object-position: center;
     user-select: none;
     -webkit-user-drag: none;
-
-    transition:
-      opacity 2.5s ease;
   }
 
-
-  /* ================================================
-     HERO
-
-     A hero is simply one of the existing images,
-     enlarged to a 2 × 2 square.
-
-     It floats above the grid.
-  ================================================ */
+  /* ---------------- HERO ----------------
+     Hero is exactly 2 x 2 normal tile units.
+     It is an overlay, so every underlying square
+     remains occupied.
+  ------------------------------------------ */
 
   .hero {
-    position: fixed !important;
-
+    position: fixed;
     z-index: 80;
 
     width: var(--hero-size);
     height: var(--hero-size);
 
-    aspect-ratio: 1 / 1;
-
     overflow: hidden;
-
     opacity: 0;
+
+    transform:
+      translate3d(var(--hero-x), var(--hero-y), 0)
+      scale(.965);
+
+    transition:
+      opacity 2s ease,
+      transform 2.4s cubic-bezier(.22, .61, .36, 1);
 
     pointer-events: none;
 
-    box-shadow:
-      0 0 0 1px rgba(0, 0, 0, .12);
-
-    transform:
-      translate3d(
-        var(--hero-x),
-        var(--hero-y),
-        0
-      )
-      scale(.94);
-
-    transition:
-      opacity 2.2s ease,
-      transform 2.8s cubic-bezier(.2, .7, .2, 1);
+    box-shadow: 0 0 0 1px rgba(0,0,0,.12);
   }
 
   .hero.show {
     opacity: 1;
-
     transform:
-      translate3d(
-        var(--hero-x),
-        var(--hero-y),
-        0
-      )
+      translate3d(var(--hero-x), var(--hero-y), 0)
       scale(1);
   }
 
   .hero img {
+    display: block;
     width: 100%;
     height: 100%;
-
-    display: block;
-
     object-fit: cover;
+    object-position: center;
   }
 
-
-  /* ================================================
-     FOOTER
-  ================================================ */
+  /* ---------------- FOOTER ---------------- */
 
   .footer-left {
     position: absolute;
     z-index: 100;
-
     left: 24px;
     bottom: 22px;
   }
 
   .footer-label {
     margin-bottom: 7px;
-
     font-family: Arial, Helvetica, sans-serif;
     font-size: 9px;
     letter-spacing: .14em;
@@ -268,27 +201,19 @@
 
   .subscribe {
     display: inline-block;
-
     color: var(--ink);
     text-decoration: none;
-
     font-size: 14px;
     line-height: 1.2;
-
-    border-bottom: 1px solid rgba(0, 0, 0, .4);
-
+    border-bottom: 1px solid rgba(0,0,0,.4);
     padding-bottom: 2px;
   }
 
-  .subscribe:hover {
-    border-bottom-color: var(--ink);
-  }
-
+  .subscribe:hover { border-bottom-color: var(--ink); }
 
   .footer-right {
     position: absolute;
     z-index: 100;
-
     right: 24px;
     bottom: 23px;
 
@@ -311,33 +236,23 @@
   .counter-line {
     width: 20px;
     height: 1px;
-
-    background: rgba(0, 0, 0, .45);
+    background: rgba(0,0,0,.45);
   }
 
   button {
     appearance: none;
-
     border: 0;
     padding: 0;
     margin: 0;
-
     background: transparent;
     color: var(--ink);
-
     font: inherit;
-
     cursor: pointer;
   }
 
-  button:hover {
-    opacity: .5;
-  }
+  button:hover { opacity: .5; }
 
-
-  /* ================================================
-     INTRO
-  ================================================ */
+  /* ---------------- INTRO ---------------- */
 
   .intro {
     position: fixed;
@@ -349,17 +264,14 @@
     justify-content: center;
 
     background: var(--paper);
-
     pointer-events: none;
 
-    animation:
-      introOut 1.2s ease 1.25s forwards;
+    animation: introOut 1s ease 1.25s forwards;
   }
 
   .intro-text {
     font-size: clamp(35px, 6vw, 90px);
     letter-spacing: -.055em;
-
     opacity: 0;
 
     animation:
@@ -368,52 +280,29 @@
   }
 
   @keyframes introIn {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
   }
 
   @keyframes introTextOut {
-    from {
-      opacity: 1;
-    }
-
-    to {
-      opacity: 0;
-    }
+    from { opacity: 1; }
+    to   { opacity: 0; }
   }
 
   @keyframes introOut {
-    from {
-      opacity: 1;
-    }
-
-    to {
-      opacity: 0;
-    }
+    from { opacity: 1; }
+    to   { opacity: 0; }
   }
 
-
-  /* ================================================
-     MOBILE
-  ================================================ */
+  /* ---------------- MOBILE ---------------- */
 
   @media (max-width: 700px) {
-
     .masthead {
       top: 15px;
       left: 15px;
     }
 
-    .title {
-      font-size: 30px;
-    }
+    .title { font-size: 30px; }
 
     .subtitle {
       margin-top: 7px;
@@ -426,16 +315,12 @@
       font-size: 8px;
     }
 
-    .wall {
-      top: 76px;
-      left: 12px;
-      right: 12px;
-      bottom: 82px;
-
-      grid-template-columns: repeat(6, minmax(0, 1fr));
-      grid-template-rows: repeat(6, minmax(0, 1fr));
-
-      gap: 3px;
+    .wall-wrap {
+      width: min(
+        calc(100vw - 30px),
+        calc(100vh - 155px)
+      );
+      top: 49%;
     }
 
     .footer-left {
@@ -449,21 +334,11 @@
       gap: 12px;
     }
 
-    .subscribe {
-      font-size: 12px;
-    }
+    .subscribe { font-size: 12px; }
   }
 
-
-  /* ================================================
-     REDUCED MOTION
-  ================================================ */
-
   @media (prefers-reduced-motion: reduce) {
-
-    .intro {
-      display: none;
-    }
+    .intro { display: none; }
 
     .tile,
     .hero,
@@ -475,115 +350,56 @@
 </style>
 </head>
 
-
 <body>
-
 <div class="page">
 
-
-  <!-- ============================================
-       INTRO
-  ============================================= -->
-
   <div class="intro" aria-hidden="true">
-    <div class="intro-text">
-      ukraine@war
-    </div>
+    <div class="intro-text">ukraine@war</div>
   </div>
-
-
-  <!-- ============================================
-       HEADER
-  ============================================= -->
 
   <header class="masthead">
-
-    <h1 class="title">
-      ukraine@war
-    </h1>
-
-    <div class="subtitle">
-      67 images / living wall
-    </div>
-
+    <h1 class="title">ukraine@war</h1>
+    <div class="subtitle">67 images / living wall</div>
   </header>
 
+  <div class="credit">drone dept. / 2026</div>
 
-  <div class="credit">
-    drone dept. / 2026
+  <div class="wall-wrap">
+    <main class="wall" id="wall" aria-label="Ukraine at war — living wall"></main>
   </div>
 
-
-  <!-- ============================================
-       WALL
-
-       Only the 67 real files are used.
-  ============================================= -->
-
-  <main
-    class="wall"
-    id="wall"
-    aria-label="Ukraine at war — living wall"
-  ></main>
-
-
-  <!-- ============================================
-       FOOTER
-  ============================================= -->
-
   <div class="footer-left">
-
-    <div class="footer-label">
-      The Daily Dispatch
-    </div>
-
+    <div class="footer-label">The Daily Dispatch</div>
     <a
       class="subscribe"
       href="https://abdymok.substack.com/"
       target="_blank"
       rel="noopener noreferrer"
-    >
-      Read &amp; subscribe on Substack →
-    </a>
-
+    >Read &amp; subscribe on Substack →</a>
   </div>
 
-
   <div class="footer-right">
-
     <div class="counter">
       <span id="counter">01</span>
       <span class="counter-line"></span>
     </div>
 
-    <button
-      id="recompose"
-      type="button"
-    >
-      Recompose
-    </button>
-
-    <button
-      id="pause"
-      type="button"
-    >
-      Pause
-    </button>
-
+    <button id="recompose" type="button">Recompose</button>
+    <button id="pause" type="button">Pause</button>
   </div>
-
 </div>
 
-
 <script>
+/*
+  =====================================================
+  SOURCE OF TRUTH
+  =====================================================
 
-/* ==================================================
-   THE 67 ACTUAL FILES
+  These are the ONLY images this page is allowed to use.
+  There are exactly 67 of them in the repository.
+*/
 
-   Nothing else is permitted into the wall.
-================================================== */
-
-const files = [
+const FILES = [
   "1.jfif",
   "2.jfif",
   "3.jfif",
@@ -593,504 +409,373 @@ const files = [
 ];
 
 for (let i = 7; i <= 67; i++) {
-  files.push(`${i}.jpg`);
+  FILES.push(`${i}.jpg`);
 }
 
 
-/* ==================================================
-   ELEMENTS
-================================================== */
+/*
+  =====================================================
+  WALL RULES
+  =====================================================
 
-const wall =
-  document.getElementById("wall");
+  64 visible squares at all times.
+  67 source images total.
+  A shuffle selects 64 of the 67.
+  No blank cell is ever created.
+*/
 
-const counter =
-  document.getElementById("counter");
+const GRID = 8;
+const VISIBLE = GRID * GRID;
 
-const recomposeButton =
-  document.getElementById("recompose");
-
-const pauseButton =
-  document.getElementById("pause");
-
-
-/* ==================================================
-   STATE
-================================================== */
+const wall = document.getElementById("wall");
+const counter = document.getElementById("counter");
+const recomposeButton = document.getElementById("recompose");
+const pauseButton = document.getElementById("pause");
 
 let tiles = [];
-
+let activeFiles = [];
+let unusedFiles = [];
 let paused = false;
-
 let composition = 0;
-
-let currentHero = null;
-
-let heroVisible = false;
+let heroElement = null;
+let heroFile = null;
 
 
-/* ==================================================
-   HELPERS
-================================================== */
-
-function random(min, max) {
-
-  return Math.random() * (max - min) + min;
-
-}
-
+/*
+  Fisher-Yates shuffle.
+*/
 
 function shuffle(array) {
+  const a = [...array];
 
-  const result = [...array];
-
-  for (
-    let i = result.length - 1;
-    i > 0;
-    i--
-  ) {
-
-    const j =
-      Math.floor(
-        Math.random() * (i + 1)
-      );
-
-    [
-      result[i],
-      result[j]
-    ] = [
-      result[j],
-      result[i]
-    ];
-
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
   }
 
-  return result;
+  return a;
 }
 
 
-/* ==================================================
-   CREATE THE WALL
+/*
+  =====================================================
+  INITIAL WALL
+  =====================================================
 
-   Exactly 67 image elements.
+  Choose 64 of the 67.
+  Every grid cell gets an image immediately.
+*/
 
-   First 64 occupy the 8 × 8 grid.
-   The remaining 3 are initially hidden
-   and later become heroes.
-================================================== */
+function initialFiles() {
+  const chosen = shuffle(FILES).slice(0, VISIBLE);
 
-function createWall() {
+  activeFiles = chosen;
+  unusedFiles = FILES.filter(file => !chosen.includes(file));
+}
 
+
+/*
+  Create exactly 64 DOM tiles.
+*/
+
+function buildWall() {
   wall.innerHTML = "";
-
   tiles = [];
 
-  files.forEach((file, index) => {
-
-    const tile =
-      document.createElement("div");
-
+  activeFiles.forEach((file, index) => {
+    const tile = document.createElement("div");
     tile.className = "tile";
+    tile.dataset.index = index;
 
-    /*
-      Images 1–64 are the quiet underlying wall.
-
-      Images 65–67 are reserved as possible
-      hero images.
-
-      They are still part of the same 67-image
-      collection.
-    */
-
-    if (index >= 64) {
-
-      tile.style.display = "none";
-
-    }
-
-
-    const img =
-      document.createElement("img");
-
+    const img = document.createElement("img");
     img.src = file;
-
-    img.alt =
-      `Ukraine at war — image ${index + 1}`;
-
+    img.alt = `Ukraine at war — image ${FILES.indexOf(file) + 1}`;
     img.decoding = "async";
 
-    img.loading =
-      index < 20
-        ? "eager"
-        : "lazy";
-
-
     /*
-      If a file cannot be found, hide it.
-      Never substitute anything.
+      If an image fails, do NOT replace it with anything.
+      The browser keeps the tile; there is no invented asset.
     */
-
-    img.addEventListener(
-      "error",
-      () => {
-
-        tile.style.display = "none";
-
-      }
-    );
-
+    img.addEventListener("error", () => {
+      tile.style.visibility = "hidden";
+    });
 
     tile.appendChild(img);
-
     wall.appendChild(tile);
-
     tiles.push(tile);
-
   });
 
 
   /*
-    Fade in the first 64.
+    Fade the complete wall in.
+    There are no delayed/empty cells.
   */
-
   requestAnimationFrame(() => {
-
-    tiles
-      .slice(0, 64)
-      .forEach((tile, index) => {
-
-        setTimeout(() => {
-
-          tile.classList.add("visible");
-
-        }, index * 22);
-
-      });
-
+    tiles.forEach((tile, index) => {
+      setTimeout(() => {
+        tile.classList.add("visible");
+      }, index * 12);
+    });
   });
-
-
-  updateCounter();
-
 }
 
 
-/* ==================================================
-   BREATHING
+/*
+  =====================================================
+  VERY SMALL BREATHING MOVEMENT
+  =====================================================
 
-   Very small movements.
-   Almost subliminal.
-================================================== */
+  The squares do not move enough to break the grid.
+  This is deliberately restrained.
+*/
 
 function breathe() {
+  if (paused) return;
 
-  if (paused) {
-    return;
-  }
+  tiles.forEach(tile => {
+    tile.style.setProperty(
+      "--x",
+      `${(Math.random() * 1.6 - .8).toFixed(2)}px`
+    );
 
+    tile.style.setProperty(
+      "--y",
+      `${(Math.random() * 1.6 - .8).toFixed(2)}px`
+    );
 
-  tiles
-    .slice(0, 64)
-    .forEach(tile => {
-
-      if (
-        tile.style.display === "none"
-      ) {
-        return;
-      }
-
-
-      const x =
-        random(-1.5, 1.5);
-
-      const y =
-        random(-1.5, 1.5);
-
-      const r =
-        random(-0.18, 0.18);
-
-      const s =
-        random(.998, 1.002);
-
-
-      tile.style.setProperty(
-        "--x",
-        `${x.toFixed(2)}px`
-      );
-
-      tile.style.setProperty(
-        "--y",
-        `${y.toFixed(2)}px`
-      );
-
-      tile.style.setProperty(
-        "--r",
-        `${r.toFixed(2)}deg`
-      );
-
-      tile.style.setProperty(
-        "--s",
-        s.toFixed(4)
-      );
-
-    });
-
+    tile.style.setProperty(
+      "--s",
+      (1 + (Math.random() * .002 - .001)).toFixed(4)
+    );
+  });
 }
 
 
-/* ==================================================
-   QUIET DISSOLVE
+/*
+  =====================================================
+  DISSOLVE ONE TILE INTO ANOTHER REAL IMAGE
+  =====================================================
 
-   We don't swap or invent images.
+  No blank state.
+  No white flash.
+  The old image remains underneath while the new
+  image fades over it.
+*/
 
-   We simply soften the entire wall briefly,
-   then let it settle again.
-================================================== */
+function dissolveTile(tile, newFile) {
+  const oldImg = tile.querySelector("img");
 
-function dissolveWall() {
+  if (!oldImg) return;
 
-  const base =
-    tiles.slice(0, 64);
+  const newImg = document.createElement("img");
+  newImg.src = newFile;
+  newImg.alt = `Ukraine at war — image ${FILES.indexOf(newFile) + 1}`;
+  newImg.decoding = "async";
 
+  newImg.style.position = "absolute";
+  newImg.style.inset = "0";
+  newImg.style.width = "100%";
+  newImg.style.height = "100%";
+  newImg.style.objectFit = "cover";
+  newImg.style.opacity = "0";
+  newImg.style.transition = "opacity 1.8s ease";
 
-  base.forEach(tile => {
+  tile.appendChild(newImg);
 
-    if (
-      tile.style.display === "none"
-    ) {
-      return;
-    }
-
-    tile.style.opacity = ".72";
-
+  requestAnimationFrame(() => {
+    newImg.style.opacity = "1";
   });
-
 
   setTimeout(() => {
-
-    base.forEach(tile => {
-
-      if (
-        tile.style.display === "none"
-      ) {
-        return;
-      }
-
-      tile.style.opacity = "";
-
-    });
-
-  }, 1100);
-
+    oldImg.remove();
+    newImg.style.position = "";
+    newImg.style.inset = "";
+    newImg.style.opacity = "";
+    newImg.style.transition = "";
+  }, 1900);
 }
 
 
-/* ==================================================
-   SHUFFLE
+/*
+  =====================================================
+  SHUFFLE / RECOMPOSE
+  =====================================================
 
-   The 64 underlying images change position
-   without changing size.
+  We don't physically move the DOM grid.
+  Instead, a few cells quietly dissolve into
+  other members of the 67-image collection.
 
-   The images themselves remain exactly the
-   same files.
-================================================== */
+  This preserves the perfect 8 x 8 geometry.
+*/
 
-function shuffleWall() {
+function recompose() {
+  if (paused) return;
 
-  const base =
-    tiles.slice(0, 64);
-
-  const order =
-    shuffle(base);
-
-
-  order.forEach(tile => {
-
-    wall.appendChild(tile);
-
-  });
-
+  composition++;
 
   /*
-    Breathing continues after the shuffle.
+    Pick 4–7 cells to change.
+    This is enough to make the wall feel alive
+    without turning it into visual noise.
   */
+  const count = 4 + Math.floor(Math.random() * 4);
+
+  const indexes = shuffle(
+    Array.from({ length: VISIBLE }, (_, i) => i)
+  ).slice(0, count);
+
+  /*
+    Keep track of the old files so we don't duplicate
+    an image unnecessarily during the transition.
+  */
+  const nextPool = shuffle(FILES);
+
+  indexes.forEach((index, n) => {
+    const tile = tiles[index];
+    const oldFile = activeFiles[index];
+
+    /*
+      Find a real source image not currently occupying
+      the selected cell.
+    */
+    let newFile = nextPool.find(file => file !== oldFile);
+
+    /*
+      Prefer one of the three currently unused files
+      when possible. This makes the whole 67-image
+      collection circulate through the 64 positions.
+    */
+    if (unusedFiles.length) {
+      const candidate = shuffle(unusedFiles)
+        .find(file => file !== oldFile);
+
+      if (candidate) newFile = candidate;
+    }
+
+    if (!newFile) return;
+
+    /*
+      Swap bookkeeping:
+      old image becomes available; new image becomes active.
+    */
+    unusedFiles = unusedFiles.filter(file => file !== newFile);
+
+    if (!unusedFiles.includes(oldFile)) {
+      unusedFiles.push(oldFile);
+    }
+
+    activeFiles[index] = newFile;
+
+    setTimeout(() => {
+      dissolveTile(tile, newFile);
+    }, n * 130);
+  });
 
   breathe();
 
+  /*
+    Hero appears only occasionally.
+  */
+  if (composition % 4 === 0 && !heroElement) {
+    setTimeout(showHero, 1200);
+  }
+
+  /*
+    Occasionally let the hero disappear.
+  */
+  if (composition % 5 === 0 && heroElement) {
+    setTimeout(hideHero, 700);
+  }
+
+  updateCounter();
 }
 
 
-/* ==================================================
-   HERO
+/*
+  =====================================================
+  HERO
+  =====================================================
 
-   One of images 65, 66, 67 becomes a larger
-   square.
+  A hero is a 2 x 2 square made from one of the
+  EXISTING 67 images.
 
-   It is still exactly the same image file.
-================================================== */
+  It is an overlay. Therefore the 64 underlying
+  squares remain completely filled.
+*/
 
 function showHero() {
+  if (paused || heroElement) return;
 
   /*
-    Remove any previous hero.
+    Choose an image that is currently visible.
+    Therefore the hero is literally one of the
+    images already in the wall.
   */
+  const visibleIndex =
+    Math.floor(Math.random() * activeFiles.length);
 
-  hideHero();
+  const file = activeFiles[visibleIndex];
 
+  heroFile = file;
 
-  /*
-    Choose one of the three reserved images.
-  */
-
-  const candidates = [64, 65, 66];
-
-  let chosen =
-    candidates[
-      Math.floor(
-        Math.random() *
-        candidates.length
-      )
-    ];
-
-
-  /*
-    Make sure we don't immediately repeat
-    the same hero.
-  */
-
-  if (
-    currentHero !== null &&
-    candidates.length > 1
-  ) {
-
-    while (
-      chosen === currentHero
-    ) {
-
-      chosen =
-        candidates[
-          Math.floor(
-            Math.random() *
-            candidates.length
-          )
-        ];
-
-    }
-
-  }
-
-
-  currentHero = chosen;
-
-
-  const source =
-    tiles[chosen];
-
-
-  const hero =
-    document.createElement("div");
-
+  const hero = document.createElement("div");
   hero.className = "hero";
 
-
-  const img =
-    document.createElement("img");
-
-  /*
-    THIS IS THE ORIGINAL FILE.
-    No generated image.
-    No duplicate asset.
-    No alteration.
-  */
-
-  img.src =
-    files[chosen];
-
-  img.alt =
-    `Ukraine at war — image ${chosen + 1}`;
-
+  const img = document.createElement("img");
+  img.src = file;
+  img.alt = `Ukraine at war — image ${FILES.indexOf(file) + 1}`;
   img.decoding = "async";
 
-
   hero.appendChild(img);
-
   document.body.appendChild(hero);
 
+  /*
+    Calculate the actual normal tile size from
+    the rendered 8 x 8 wall.
+
+    Hero = exactly two tile widths + one gap
+         = exactly two tile heights + one gap.
+  */
+  const wallRect = wall.getBoundingClientRect();
+
+  const tileSize =
+    (wallRect.width - 7 * parseFloat(
+      getComputedStyle(wall).gap
+    )) / 8;
+
+  const gap =
+    parseFloat(getComputedStyle(wall).gap);
+
+  const heroSize =
+    tileSize * 2 + gap;
 
   /*
-    Determine a square hero size based on
-    the available wall.
-
-    Desktop: approximately 2 regular tiles.
+    Keep the hero inside the viewport and clear of
+    the header/footer.
   */
+  const margin = 18;
 
-  const viewportWidth =
-    window.innerWidth;
+  const minX = margin;
+  const maxX = Math.max(
+    minX,
+    window.innerWidth - heroSize - margin
+  );
 
-  const viewportHeight =
-    window.innerHeight;
-
-
-  let size;
-
-  if (viewportWidth > 700) {
-
-    size =
-      Math.min(
-        viewportWidth * .24,
-        viewportHeight * .40
-      );
-
-  }
-  else {
-
-    size =
-      Math.min(
-        viewportWidth * .42,
-        viewportHeight * .30
-      );
-
-  }
-
-
-  /*
-    Keep the hero away from the masthead
-    and footer.
-  */
-
-  const minTop =
-    viewportWidth > 700
-      ? 120
-      : 85;
-
-  const maxTop =
-    viewportHeight -
-    size -
-    105;
-
+  const minY = 92;
+  const maxY = Math.max(
+    minY,
+    window.innerHeight - heroSize - 78
+  );
 
   const x =
-    random(
-      24,
-      viewportWidth -
-      size -
-      24
-    );
-
+    minX + Math.random() * (maxX - minX);
 
   const y =
-    random(
-      minTop,
-      Math.max(
-        minTop,
-        maxTop
-      )
-    );
-
+    minY + Math.random() * (maxY - minY);
 
   hero.style.setProperty(
     "--hero-size",
-    `${size}px`
+    `${heroSize}px`
   );
 
   hero.style.setProperty(
@@ -1103,224 +788,82 @@ function showHero() {
     `${y}px`
   );
 
-
-  /*
-    Fade in.
-  */
+  heroElement = hero;
 
   requestAnimationFrame(() => {
-
     requestAnimationFrame(() => {
-
       hero.classList.add("show");
-
     });
-
   });
-
-
-  currentHero = chosen;
-
-  currentHeroElement = hero;
-
-  heroVisible = true;
-
-
-  /*
-    Let the hero breathe very slightly.
-  */
-
-  setTimeout(() => {
-
-    if (
-      heroVisible &&
-      !paused
-    ) {
-
-      hero.style.transform =
-        `translate3d(${x}px, ${y}px, 0) scale(1.012)`;
-
-    }
-
-  }, 2500);
-
 }
-
-
-/* ==================================================
-   HERO STATE
-================================================== */
-
-let currentHeroElement = null;
 
 
 function hideHero() {
+  if (!heroElement) return;
 
-  if (!currentHeroElement) {
-    heroVisible = false;
-    return;
-  }
-
-
-  const hero =
-    currentHeroElement;
-
-
-  heroVisible = false;
-
+  const hero = heroElement;
 
   hero.classList.remove("show");
-
+  heroElement = null;
+  heroFile = null;
 
   setTimeout(() => {
-
-    if (
-      hero.parentNode
-    ) {
-
+    if (hero.parentNode) {
       hero.parentNode.removeChild(hero);
-
     }
-
-  }, 2400);
-
-
-  currentHeroElement = null;
-
+  }, 2200);
 }
 
 
-/* ==================================================
-   RECOMPOSE
-
-   Slow, restrained sequence:
-
-   1. shuffle the underlying 64
-   2. breathe
-   3. occasionally introduce a hero
-   4. occasionally remove it
-================================================== */
-
-function recompose() {
-
-  if (paused) {
-    return;
-  }
-
-
-  composition++;
-
-
-  shuffleWall();
-
-
-  dissolveWall();
-
-
-  /*
-    Hero approximately every third
-    composition.
-
-    Then it disappears again later.
-
-    This keeps it exceptional.
-  */
-
-  if (
-    composition % 3 === 0 &&
-    !heroVisible
-  ) {
-
-    setTimeout(
-      showHero,
-      1200
-    );
-
-  }
-
-
-  else if (
-    composition % 4 === 0 &&
-    heroVisible
-  ) {
-
-    setTimeout(
-      hideHero,
-      800
-    );
-
-  }
-
-
-  updateCounter();
-
-}
-
-
-/* ==================================================
-   COUNTER
-================================================== */
+/*
+  =====================================================
+  COUNTER
+  =====================================================
+*/
 
 function updateCounter() {
-
   counter.textContent =
-    String(
-      (composition + 1) % 100
-    ).padStart(2, "0");
-
+    String((composition + 1) % 100).padStart(2, "0");
 }
 
 
-/* ==================================================
-   PAUSE
-================================================== */
+/*
+  =====================================================
+  PAUSE
+  =====================================================
+*/
 
 function togglePause() {
-
   paused = !paused;
 
-
   pauseButton.textContent =
-    paused
-      ? "Play"
-      : "Pause";
+    paused ? "Play" : "Pause";
 
-
-  if (!paused) {
-
+  if (paused) {
+    if (heroElement) hideHero();
+  } else {
     breathe();
-
   }
-
 }
 
 
-/* ==================================================
-   BUTTONS
-================================================== */
+/*
+  =====================================================
+  CONTROLS
+  =====================================================
+*/
 
-recomposeButton.addEventListener(
-  "click",
-  () => {
+recomposeButton.addEventListener("click", () => {
+  const wasPaused = paused;
 
-    const wasPaused =
-      paused;
+  paused = false;
+  recompose();
 
-    paused = false;
+  paused = wasPaused;
 
-    recompose();
-
-    paused =
-      wasPaused;
-
-    pauseButton.textContent =
-      paused
-        ? "Play"
-        : "Pause";
-
-  }
-);
-
+  pauseButton.textContent =
+    paused ? "Play" : "Pause";
+});
 
 pauseButton.addEventListener(
   "click",
@@ -1328,47 +871,48 @@ pauseButton.addEventListener(
 );
 
 
-/* ==================================================
-   VERY SLOW BREATHING
-================================================== */
+/*
+  =====================================================
+  SLOW RHYTHM
+  =====================================================
+*/
 
-setInterval(
-  () => {
+setInterval(() => {
+  if (!paused) breathe();
+}, 6500);
 
-    if (!paused) {
-      breathe();
-    }
-
-  },
-  7000
-);
-
-
-/* ==================================================
-   SLOW RECOMPOSITION
-
-   Every 18 seconds rather than constantly.
-================================================== */
-
-setInterval(
-  () => {
-
-    if (!paused) {
-      recompose();
-    }
-
-  },
-  18000
-);
+setInterval(() => {
+  if (!paused) recompose();
+}, 18000);
 
 
-/* ==================================================
-   START
-================================================== */
+/*
+  =====================================================
+  RESIZE
+  =====================================================
 
-createWall();
+  The wall remains square because its container has
+  aspect-ratio: 1 / 1.
+
+  If resized while a hero is present, remove it so
+  the next hero is calculated from the new tile size.
+*/
+
+window.addEventListener("resize", () => {
+  if (heroElement) hideHero();
+});
+
+
+/*
+  =====================================================
+  START
+  =====================================================
+*/
+
+initialFiles();
+buildWall();
+breathe();
 
 </script>
-
 </body>
 </html>
