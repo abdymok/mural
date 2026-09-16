@@ -1,7 +1,7 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ukraine@war</title>
 <style>
@@ -11,66 +11,42 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--paper
 body{font-family:Georgia,"Times New Roman",serif}
 .page{position:relative;width:100vw;height:100vh}
 
-.masthead{position:absolute;z-index:20;top:22px;left:24px}
-.title{margin:0;font-size:clamp(34px,3vw,52px);line-height:.9;font-weight:400;letter-spacing:-.055em}
-.subtitle,.credit,.footer-label,.footer-right{
- font-family:Arial,Helvetica,sans-serif;text-transform:uppercase;letter-spacing:.12em
-}
-.subtitle{margin-top:9px;font-size:9px}
-.credit{position:absolute;z-index:20;right:22px;top:22px;font-size:9px;writing-mode:vertical-rl;transform:rotate(180deg)}
+.masthead{position:absolute;z-index:100;top:22px;left:24px}
+.title{margin:0;font-size:clamp(34px,3vw,52px);font-weight:400;line-height:.9;letter-spacing:-.055em}
+.subtitle{margin-top:9px;font:9px Arial,sans-serif;letter-spacing:.1em;text-transform:uppercase}
+.credit{position:absolute;z-index:100;top:22px;right:22px;font:9px Arial,sans-serif;letter-spacing:.13em;text-transform:uppercase;writing-mode:vertical-rl;transform:rotate(180deg)}
 
-.wall-wrap{
- position:absolute;z-index:5;left:50%;top:51%;
- transform:translate(-50%,-50%);
- width:min(calc(100vw - 48px),calc(100vh - 185px));
- aspect-ratio:1;
-}
-.wall{
- width:100%;height:100%;
- display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);
- gap:var(--gap)
-}
+.wall-wrap{position:absolute;z-index:5;left:50%;top:51%;transform:translate(-50%,-50%);width:min(calc(100vw - 48px),calc(100vh - 185px));aspect-ratio:1}
+.wall{width:100%;height:100%;display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);gap:var(--gap)}
 .tile{position:relative;overflow:hidden;background:#111;min-width:0;min-height:0}
-.tile img{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:cover}
-.tile .front{opacity:1;z-index:1}
-.tile .back{opacity:0;z-index:2;transition:opacity 1.6s ease}
-.tile.dissolve .back{opacity:1}
+.tile img{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:cover;will-change:opacity,transform}
+.tile .a{z-index:1;opacity:1}
+.tile .b{z-index:2;opacity:0}
+.tile.dissolve .b{opacity:1}
+.tile img{transition:opacity 1.35s ease,transform 6s cubic-bezier(.22,.61,.36,1)}
+.tile.breathe .a{transform:scale(1.012)}
+.tile.breathe .b{transform:scale(1.012)}
+.tile.move .a,.tile.move .b{transform:scale(1.018)}
 
-/* Constant, deliberately tiny breathing. */
-.tile .front{animation:breath 6.5s ease-in-out infinite alternate}
-@keyframes breath{
- from{transform:scale(1)}
- to{transform:scale(1.012)}
-}
-
-/* Hero is always exactly two grid cells by two grid cells. */
-.hero{
- position:fixed;z-index:50;display:none;overflow:hidden;
- width:var(--hero-size);height:var(--hero-size);
- box-shadow:0 0 0 1px rgba(0,0,0,.22);
- opacity:0;transform:scale(.96);
- transition:opacity 1.1s ease,transform 1.1s ease;
- pointer-events:none
-}
+.hero{position:fixed;z-index:80;display:none;width:var(--hero-size);height:var(--hero-size);overflow:hidden;opacity:0;transform:scale(.94);transition:opacity 1.2s ease,transform 1.2s ease;pointer-events:none;box-shadow:0 0 0 1px rgba(0,0,0,.18)}
 .hero img{width:100%;height:100%;display:block;object-fit:cover}
-.hero.on{opacity:1;transform:scale(1)}
+.hero.show{opacity:1;transform:scale(1)}
 
-.footer-left{position:absolute;z-index:20;left:24px;bottom:22px}
-.footer-label{margin-bottom:7px;font-size:9px}
-.subscribe{color:var(--ink);text-decoration:none;font-size:14px;border-bottom:1px solid rgba(0,0,0,.4);padding-bottom:2px}
-.footer-right{position:absolute;z-index:20;right:24px;bottom:23px;display:flex;align-items:center;gap:19px;font-size:9px}
-.counter{display:flex;align-items:center;gap:9px}
-.counter-line{width:20px;height:1px;background:rgba(0,0,0,.45)}
-button{border:0;background:none;color:var(--ink);font:inherit;padding:0;cursor:pointer}
+.footer-left{position:absolute;z-index:100;left:24px;bottom:22px}
+.footer-label{margin-bottom:7px;font:9px Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase}
+.subscribe{color:var(--ink);font-size:14px;text-decoration:none;border-bottom:1px solid rgba(0,0,0,.4);padding-bottom:2px}
+.footer-right{position:absolute;z-index:100;right:24px;bottom:23px;display:flex;align-items:center;gap:19px;font:9px Arial,sans-serif;letter-spacing:.12em;text-transform:uppercase}
+.counter{display:flex;align-items:center;gap:9px}.counter-line{width:20px;height:1px;background:rgba(0,0,0,.45)}
+button{border:0;background:none;color:var(--ink);padding:0;font:inherit;cursor:pointer}
 button:hover{opacity:.5}
 
-.intro{position:fixed;z-index:100;inset:0;background:var(--paper);display:flex;align-items:center;justify-content:center;animation:out .9s ease 1.1s forwards;pointer-events:none}
-.intro-text{font-size:clamp(38px,6vw,90px);letter-spacing:-.055em;animation:in .7s ease .05s both}
-@keyframes in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-@keyframes out{from{opacity:1}to{opacity:0;visibility:hidden}}
+.intro{position:fixed;z-index:1000;inset:0;background:var(--paper);display:flex;align-items:center;justify-content:center;pointer-events:none;animation:introout .9s ease 1.1s forwards}
+.intro-text{font-size:clamp(38px,6vw,90px);letter-spacing:-.055em;animation:introin .7s ease both}
+@keyframes introin{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes introout{from{opacity:1}to{opacity:0;visibility:hidden}}
 
 @media(max-width:700px){
- .masthead{left:15px;top:15px}.title{font-size:30px}.credit{right:15px;top:15px}
+ .masthead{top:15px;left:15px}.title{font-size:30px}.credit{top:15px;right:15px}
  .wall-wrap{width:min(calc(100vw - 30px),calc(100vh - 155px));top:49%}
  .footer-left{left:15px;bottom:15px}.footer-right{right:15px;bottom:16px;gap:12px}
 }
@@ -87,11 +63,8 @@ button:hover{opacity:.5}
 
   <div class="credit">drone dept. / 2026</div>
 
-  <div class="wall-wrap">
-    <main id="wall" class="wall"></main>
-  </div>
-
-  <div class="hero" id="hero"><img id="heroImg" alt=""></div>
+  <div class="wall-wrap"><main id="wall" class="wall"></main></div>
+  <div id="hero" class="hero"><img id="heroImg" alt=""></div>
 
   <div class="footer-left">
     <div class="footer-label">The Daily Dispatch</div>
@@ -106,199 +79,185 @@ button:hover{opacity:.5}
 </div>
 
 <script>
-/*
-  THE ONLY SOURCE MATERIAL:
-  1.jfif ... 6.jfif
-  7.jpg   ... 67.jpg
-*/
-const FILES=[
- "1.jfif","2.jfif","3.jfif","4.jfif","5.jfif","6.jfif"
-];
+/* EXACTLY the 67 files in the repository. */
+const FILES=["1.jfif","2.jfif","3.jfif","4.jfif","5.jfif","6.jfif"];
 for(let n=7;n<=67;n++) FILES.push(n+".jpg");
 
 const wall=document.getElementById("wall");
+const counter=document.getElementById("counter");
+const pauseButton=document.getElementById("pause");
 const hero=document.getElementById("hero");
 const heroImg=document.getElementById("heroImg");
-const counter=document.getElementById("counter");
-const pauseBtn=document.getElementById("pause");
-const tiles=[];
-let shown=[];
-let step=1;
+
+let order=shuffle(FILES).slice(0,64);
+let tiles=[];
 let paused=false;
-let heroTimeout=null;
+let round=0;
+let heroTimer=null;
 
-/* Fisher-Yates. */
-function shuffled(a){
- const b=a.slice();
- for(let i=b.length-1;i>0;i--){
-   const j=Math.floor(Math.random()*(i+1));
-   [b[i],b[j]]=[b[j],b[i]];
- }
- return b;
+function shuffle(a){
+  const b=a.slice();
+  for(let i=b.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [b[i],b[j]]=[b[j],b[i]];
+  }
+  return b;
 }
 
-/*
-  64 of the 67 images are visible at any one time.
-  This is unavoidable with a 64-cell wall, but ALL 64 CELLS
-  are occupied at all times.
-*/
-shown=shuffled(FILES).slice(0,64);
+function build(){
+  wall.innerHTML="";
+  tiles=[];
+  for(let i=0;i<64;i++){
+    const tile=document.createElement("div");
+    tile.className="tile";
 
-for(let i=0;i<64;i++){
- const tile=document.createElement("div");
- tile.className="tile";
+    const a=document.createElement("img");
+    const b=document.createElement("img");
+    a.className="a"; b.className="b";
+    a.src=order[i];
 
- const front=document.createElement("img");
- front.className="front";
- front.src=shown[i];
- front.alt="";
-
- const back=document.createElement("img");
- back.className="back";
- back.alt="";
-
- tile.append(front,back);
- wall.appendChild(tile);
- tiles.push(tile);
+    tile.appendChild(a);
+    tile.appendChild(b);
+    wall.appendChild(tile);
+    tiles.push(tile);
+  }
 }
 
-/* Warm the browser cache so dissolves don't flash blank. */
-FILES.forEach(src=>{
- const im=new Image();
- im.src=src;
-});
-
-/* Change an image by crossfading a second image over it. */
-function dissolveTile(i,newSrc){
- const tile=tiles[i];
- const back=tile.querySelector(".back");
- const front=tile.querySelector(".front");
-
- back.src=newSrc;
- back.onload=()=>{
-   tile.classList.add("dissolve");
-   window.setTimeout(()=>{
-     front.src=newSrc;
-     tile.classList.remove("dissolve");
-     back.src="";
-   },1700);
- };
+/* Preload every source. This makes later dissolves deterministic. */
+const cache=new Map();
+for(const src of FILES){
+  const im=new Image();
+  im.src=src;
+  cache.set(src,im);
 }
 
-/*
-  REAL SHUFFLE:
-  Pick 8-12 occupied cells and exchange their images.
-  Because the old image stays underneath until the new
-  one has loaded and faded in, there are no white squares.
-*/
+function setImage(tile,src){
+  const a=tile.querySelector(".a");
+  const b=tile.querySelector(".b");
+
+  /*
+    Use the already-loaded browser image cache, then fade.
+    No empty state is ever exposed.
+  */
+  b.src=src;
+
+  /* Force the browser to see the new opacity state. */
+  void b.offsetWidth;
+  tile.classList.add("dissolve","move");
+
+  window.setTimeout(()=>{
+    a.src=src;
+    tile.classList.remove("dissolve");
+    b.src="";
+  },1450);
+
+  window.setTimeout(()=>tile.classList.remove("move"),6200);
+}
+
 function recompose(){
- if(paused)return;
+  if(paused)return;
 
- step++;
- counter.textContent=String(((step-1)%99)+1).padStart(2,"0");
+  round++;
+  counter.textContent=String(((round-1)%99)+1).padStart(2,"0");
 
- const count=8+Math.floor(Math.random()*5); // 8..12
- const indexes=shuffled([...Array(64).keys()]).slice(0,count);
+  /*
+    10 cells participate. Their images rotate.
+    One of the three currently off-wall images is introduced
+    roughly every other round.
+  */
+  const cells=shuffle([...Array(64).keys()]).slice(0,10);
+  const old=cells.map(i=>order[i]);
 
- /* Take a mixture of the existing images and the 3 off-wall images. */
- const current=shown.slice();
- const offWall=FILES.filter(f=>!current.includes(f));
+  let next=shuffle(old);
 
- let pool=indexes.map(i=>current[i]);
+  /* Guarantee a non-trivial permutation. */
+  if(next.every((v,i)=>v===old[i])) next=next.slice(1).concat(next[0]);
 
- /* Usually rotate existing images; sometimes introduce an off-wall one. */
- if(offWall.length && Math.random()<0.85){
-   pool[Math.floor(Math.random()*pool.length)]=
-     offWall[Math.floor(Math.random()*offWall.length)];
- }
+  const off=FILES.filter(f=>!order.includes(f));
+  if(off.length && round%2===0){
+    const k=Math.floor(Math.random()*next.length);
+    next[k]=off[Math.floor(Math.random()*off.length)];
+  }
 
- pool=shuffled(pool);
+  cells.forEach((cell,i)=>{
+    const src=next[i];
+    if(src===order[cell])return;
+    order[cell]=src;
+    setTimeout(()=>{if(!paused)setImage(tiles[cell],src)},i*100);
+  });
 
- /* Guarantee actual change. */
- for(let k=0;k<pool.length;k++){
-   if(pool[k]===shown[indexes[k]]){
-     const swap=(k+1)%pool.length;
-     [pool[k],pool[swap]]=[pool[swap],pool[k]];
-   }
- }
+  /* The tiny "breathing" motion happens between recompositions too. */
+  tiles.forEach((tile,i)=>{
+    tile.classList.remove("breathe");
+    setTimeout(()=>{if(!paused)tile.classList.add("breathe")},(i%8)*55);
+  });
 
- indexes.forEach((cell,i)=>{
-   const old=shown[cell];
-   const next=pool[i];
-   if(next===old)return;
-
-   shown[cell]=next;
-   window.setTimeout(()=>dissolveTile(cell,next),i*90);
- });
-
- /* One occasional hero — quiet, brief, and always from the 67. */
- if(step%3===0){
-   window.setTimeout(showHero,2300);
- }
+  /* Hero every third shuffle. */
+  if(round%3===0){
+    setTimeout(()=>{if(!paused)showHero()},1800);
+  }
 }
 
-/* Hero = exactly 2 x 2 grid squares, never stretched. */
 function showHero(){
- if(paused)return;
+  if(hero.classList.contains("show"))return;
 
- const rect=wall.getBoundingClientRect();
- const gap=parseFloat(getComputedStyle(wall).gap)||5;
- const cell=(rect.width-gap*7)/8;
- const size=cell*2+gap;
+  const r=wall.getBoundingClientRect();
+  const gap=parseFloat(getComputedStyle(wall).gap)||5;
+  const cell=(r.width-gap*7)/8;
+  const size=cell*2+gap;
 
- const src=shown[Math.floor(Math.random()*shown.length)];
- heroImg.src=src;
+  const src=order[Math.floor(Math.random()*order.length)];
+  heroImg.src=src;
 
- hero.style.setProperty("--hero-size",size+"px");
+  /* Align hero exactly to the 8x8 geometry. */
+  const col=Math.floor(Math.random()*7);
+  const row=Math.floor(Math.random()*7);
+  const x=r.left+col*(cell+gap);
+  const y=r.top+row*(cell+gap);
 
- /* Put it over the wall, aligned to the same square geometry. */
- const col=Math.floor(Math.random()*7);
- const row=Math.floor(Math.random()*7);
- const x=rect.left+col*(cell+gap);
- const y=rect.top+row*(cell+gap);
+  hero.style.setProperty("--hero-size",size+"px");
+  hero.style.left=x+"px";
+  hero.style.top=y+"px";
+  hero.style.display="block";
 
- hero.style.left=x+"px";
- hero.style.top=y+"px";
- hero.style.display="block";
+  requestAnimationFrame(()=>hero.classList.add("show"));
 
- requestAnimationFrame(()=>hero.classList.add("on"));
-
- clearTimeout(heroTimeout);
- heroTimeout=setTimeout(hideHero,6500);
+  clearTimeout(heroTimer);
+  heroTimer=setTimeout(hideHero,6200);
 }
 
 function hideHero(){
- hero.classList.remove("on");
- setTimeout(()=>{if(!hero.classList.contains("on"))hero.style.display="none"},1100);
+  hero.classList.remove("show");
+  setTimeout(()=>{if(!hero.classList.contains("show"))hero.style.display="none"},1200);
 }
 
 function togglePause(){
- paused=!paused;
- pauseBtn.textContent=paused?"Play":"Pause";
- if(paused)hideHero();
+  paused=!paused;
+  pauseButton.textContent=paused?"Play":"Pause";
+  if(paused)hideHero();
 }
 
-/* Manual control. */
-document.getElementById("recompose").addEventListener("click",recompose);
-pauseBtn.addEventListener("click",togglePause);
+/* Manual test button. */
+document.getElementById("recompose").onclick=recompose;
+pauseButton.onclick=togglePause;
+
+build();
 
 /*
-  AUTOMATIC LIFE:
-  9 seconds between changes.
-  First change is deliberately soon, so it is obvious
-  that the page is alive without needing to wait 18 seconds.
+  IMPORTANT:
+  The first change happens after 2.5 seconds.
+  Then every 7 seconds.
+  This is deliberately obvious during testing.
 */
-setTimeout(()=>{if(!paused)recompose()},4500);
-setInterval(()=>{if(!paused)recompose()},9000);
+setTimeout(()=>{if(!paused)recompose()},2500);
+setInterval(()=>{if(!paused)recompose()},7000);
 
-/* Hero can also appear on its own occasionally. */
+/* Hero also appears independently from time to time. */
 setInterval(()=>{
- if(!paused && step%3!==0 && Math.random()<0.38)showHero();
-},12000);
+  if(!paused && round>0 && Math.random()<.30)showHero();
+},11000);
 
-window.addEventListener("resize",()=>{
- if(hero.style.display!=="none")hideHero();
-});
+window.addEventListener("resize",()=>hideHero());
 </script>
 </body>
 </html>
