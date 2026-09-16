@@ -169,7 +169,8 @@ function recompose(){
   });
 
   // A square 2×2-cell hero, occasionally — never rectangular.
-  if(round%2===0) setTimeout(()=>{if(!paused)showHero()},1200);\n  if(round%3===0) setTimeout(()=>{if(!paused)showHero()},5200);
+  if(round%2===0) setTimeout(()=>{if(!paused)showHero()},1200);
+  if(round%3===0) setTimeout(()=>{if(!paused)showHero()},4200);
 }
 
 function showHero(){
