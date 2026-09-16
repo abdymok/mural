@@ -21,11 +21,11 @@ body{font-family:Georgia,"Times New Roman",serif}
 .tile .a{z-index:1;opacity:1}
 .tile .b{z-index:2;opacity:0}
 .tile.swap .b{opacity:1}
-.tile img{transition:opacity 1650ms ease-in-out,transform 6500ms cubic-bezier(.22,.61,.36,1)}
-.tile.lift .a,.tile.lift .b{transform:scale(1.014)}
-.tile.lift2 .a,.tile.lift2 .b{transform:scale(1.022)}
+.tile img{transition:opacity 2400ms ease-in-out,transform 6500ms cubic-bezier(.22,.61,.36,1)}
+.tile.lift .a,.tile.lift .b{transform:scale(1.006)}
+.tile.lift2 .a,.tile.lift2 .b{transform:scale(1.008)}
 
-.hero{position:fixed;z-index:80;display:none;overflow:hidden;opacity:0;transform:scale(.92);transition:opacity 900ms ease,transform 1100ms cubic-bezier(.22,.61,.36,1);pointer-events:none;box-shadow:0 0 0 1px rgba(0,0,0,.22);background:#111}
+.hero{position:fixed;z-index:80;display:none;overflow:hidden;opacity:0;transform:scale(.985);transition:opacity 1600ms ease-in-out,transform 1800ms cubic-bezier(.22,.61,.36,1);pointer-events:none;box-shadow:0 0 0 1px rgba(0,0,0,.22);background:#111}
 .hero img{width:100%;height:100%;display:block;object-fit:cover}
 .hero.show{opacity:1;transform:scale(1)}
 
@@ -138,9 +138,9 @@ function swapTile(index,src,delay){
         b.removeAttribute("src");
         tile.classList.remove("swap");
         order[index]=src;
-      },1680);
+      },2430);
 
-      setTimeout(()=>tile.classList.remove("lift2"),6400);
+      setTimeout(()=>tile.classList.remove("lift2"),7000);
     }));
   },delay);
 }
@@ -151,7 +151,7 @@ function recompose(){
   counter.textContent=String(((round-1)%99)+1).padStart(2,"0");
 
   // 16 cells change on each pass. This is intentionally more visible than the previous version.
-  const cells=shuffle([...Array(64).keys()]).slice(0,16);
+  const cells=shuffle([...Array(64).keys()]).slice(0,12);
   const current=cells.map(i=>order[i]);
   let incoming=shuffle(current);
   if(incoming.every((v,i)=>v===current[i])) incoming=incoming.slice(1).concat(incoming[0]);
@@ -160,7 +160,7 @@ function recompose(){
   const off=FILES.filter(f=>!order.includes(f));
   if(off.length){incoming[0]=off[(round-1)%off.length]}
 
-  cells.forEach((cell,i)=>swapTile(cell,incoming[i],i*85));
+  cells.forEach((cell,i)=>swapTile(cell,incoming[i],i*170));
 
   // Very slow, barely perceptible breathing across the wall.
   tiles.forEach((tile,i)=>{
@@ -169,7 +169,7 @@ function recompose(){
   });
 
   // A square 2×2-cell hero, occasionally — never rectangular.
-  if(round%3===0) setTimeout(()=>{if(!paused)showHero()},1800);
+  if(round%2===0) setTimeout(()=>{if(!paused)showHero()},900);\n  if(round%4===0) setTimeout(()=>{if(!paused)showHero()},2600);
 }
 
 function showHero(){
@@ -186,7 +186,7 @@ function showHero(){
   hero.style.display="block";
   requestAnimationFrame(()=>hero.classList.add("show"));
   clearTimeout(heroTimeout);
-  heroTimeout=setTimeout(hideHero,5600);
+  heroTimeout=setTimeout(hideHero,7200);
 }
 function hideHero(){
   hero.classList.remove("show");
@@ -207,7 +207,7 @@ pauseBtn.addEventListener("click",togglePause);
 timerA=setTimeout(()=>recompose(),2000);
 timerB=setInterval(()=>recompose(),5000);
 // Independent hero heartbeat, so the hero does not depend on a successful shuffle round.
-setInterval(()=>{if(!paused && Math.random()<0.45)showHero()},9000);
+setInterval(()=>{if(!paused && Math.random()<0.55)showHero()},6500);
 window.addEventListener("resize",hideHero);
 </script>
 </body>
