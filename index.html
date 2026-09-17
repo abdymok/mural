@@ -19,7 +19,7 @@ body{font-family:Arial,sans-serif}
 .subtitle{margin-top:9px;font:9px Arial,sans-serif;letter-spacing:.1em;text-transform:uppercase}
 .credit{position:absolute;z-index:100;top:22px;right:22px;font:9px Arial,sans-serif;letter-spacing:.13em;text-transform:uppercase;writing-mode:vertical-rl;transform:rotate(180deg)}
 .wall-wrap{position:absolute;z-index:5;left:50%;top:51%;transform:translate(-50%,-50%);width:min(calc(100vw - 48px),calc(100vh - 185px));aspect-ratio:1}
-.wall{position:relative;width:100%;height:100%;opacity:0;transition:opacity 2200ms cubic-bezier(.22,.61,.36,1)}
+.wall{position:relative;width:100%;height:100%;opacity:0;transition:opacity 5500ms cubic-bezier(.22,.61,.36,1)}
 .wall.reveal{opacity:1}
 .tile{
   position:absolute;overflow:hidden;background:#111;cursor:pointer;
@@ -455,7 +455,7 @@ function startHeartbeats(){
 build();
 setTimeout(()=>{
   intro.classList.add("hide");
-  setTimeout(()=>wall.classList.add("reveal"),220);
+  setTimeout(()=>wall.classList.add("reveal"),500);
   setTimeout(()=>intro.style.visibility="hidden",1800);
 },6000);
 
