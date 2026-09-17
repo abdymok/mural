@@ -189,20 +189,13 @@ function createTile(src){
   tile.append(a,b);
   wall.append(tile);
 
-  const item={el:tile,src,a,b,row:0,col:0,size:1,hero:false};
+  const item={el:tile,src,displayedSrc:src,a,b,row:0,col:0,size:1,hero:false};
   tile.addEventListener("click",()=>{
-    // During a live swap, the B layer is the image actually being revealed.
-    // Use the visually active layer so a click during the crossfade never
-    // opens the previous image's post.
-    let displayedSrc=item.src;
-    const bSrc=item.b.getAttribute("src");
-    const aSrc=item.a.getAttribute("src");
-    if(item.el.classList.contains("swap") && item.b.classList.contains("loaded") && bSrc){
-      displayedSrc=bSrc;
-    }else if(aSrc){
-      displayedSrc=aSrc;
-    }
-    const filename=displayedSrc.split("/").pop();
+    // displayedSrc is updated the instant a new B layer becomes the
+    // visible/revealing image. This makes the link deterministic even if
+    // the user clicks during the crossfade or in the tiny frame before
+    // the CSS .swap class is applied.
+    const filename=item.displayedSrc.split("/").pop();
     const url=SUBSTACK_LINKS[FILES.indexOf(filename)];
     if(url) window.open(url,"_blank","noopener");
   });
@@ -339,6 +332,9 @@ function swapImage(t,src,delay=0){
       t.b.classList.remove("loaded");
       t.b.src=src;
       t.b.classList.add("loaded");
+      // From this point the B layer is the image being revealed, so its
+      // post is the one that should open if the tile is clicked.
+      t.displayedSrc=src;
 
       requestAnimationFrame(()=>requestAnimationFrame(()=>{
         if(paused)return;
@@ -351,6 +347,7 @@ function swapImage(t,src,delay=0){
           t.b.classList.remove("loaded");
           t.el.classList.remove("swap");
           t.src=src;
+          t.displayedSrc=src;
           t.el.dataset.src=src;
         },3600);
       }));
