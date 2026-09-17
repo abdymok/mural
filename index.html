@@ -8,7 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;500&display=swap" rel="stylesheet">
 <title>ukraine@war</title>
 <style>
-:root{--paper:#fff;--ink:#111;--gap:5px}
+:root{--paper:#fff;--ink:#111;--gap:5px;--ease:cubic-bezier(.22,.61,.36,1)}
 *{box-sizing:border-box}
 html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--paper);color:var(--ink)}
 body{font-family:Arial,sans-serif}
@@ -19,19 +19,28 @@ body{font-family:Arial,sans-serif}
 .subtitle{margin-top:9px;font:9px Arial,sans-serif;letter-spacing:.1em;text-transform:uppercase}
 .credit{position:absolute;z-index:100;top:22px;right:22px;font:9px Arial,sans-serif;letter-spacing:.13em;text-transform:uppercase;writing-mode:vertical-rl;transform:rotate(180deg)}
 .wall-wrap{position:absolute;z-index:5;left:50%;top:51%;transform:translate(-50%,-50%);width:min(calc(100vw - 48px),calc(100vh - 185px));aspect-ratio:1}
-.wall{width:100%;height:100%;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));grid-template-rows:repeat(8,minmax(0,1fr));gap:var(--gap)}
-.tile{position:relative;overflow:hidden;background:#111;min-width:0;min-height:0;cursor:pointer}
+.wall{position:relative;width:100%;height:100%}
+.tile{
+  position:absolute;overflow:hidden;background:#111;cursor:pointer;
+  will-change:transform,width,height,opacity;
+  transition:
+    transform 2400ms var(--ease),
+    width 2400ms var(--ease),
+    height 2400ms var(--ease),
+    opacity 1600ms ease;
+  transform-origin:center center;
+}
 .tile img{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:cover}
 .tile .a{z-index:1;opacity:1}
 .tile .b{z-index:2;opacity:0}
 .tile.swap .b{opacity:1}
-.tile img{transition:opacity 3600ms cubic-bezier(.25,.1,.25,1),transform 9000ms cubic-bezier(.22,.61,.36,1);will-change:opacity,transform}
+.tile img{transition:opacity 3600ms ease,transform 9000ms var(--ease);will-change:opacity,transform}
 .tile.lift .a,.tile.lift .b{transform:scale(1.012)}
-.tile.lift2 .a,.tile.lift2 .b{transform:scale(1.014)}
-
-.hero{position:fixed;z-index:80;display:none;overflow:hidden;opacity:0;transform:scale(.99);transition:opacity 3000ms cubic-bezier(.25,.1,.25,1),transform 4200ms cubic-bezier(.22,.61,.36,1);will-change:opacity,transform;pointer-events:none;box-shadow:0 0 0 1px rgba(0,0,0,.22);background:#111}
-.hero img{width:100%;height:100%;display:block;object-fit:cover}
-.hero.show{opacity:1;transform:scale(1)}
+.tile.hero-tile{z-index:30;cursor:pointer;box-shadow:0 0 0 1px rgba(0,0,0,.18)}
+.tile.hero-tile img{transform:scale(1.002)}
+.tile.suspended{pointer-events:none;opacity:.02}
+.tile.entering{opacity:0}
+.tile.leaving{opacity:0}
 
 .footer-left{position:absolute;z-index:100;left:24px;bottom:22px}
 .footer-label{margin-bottom:7px;font:9px Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase}
@@ -40,8 +49,8 @@ body{font-family:Arial,sans-serif}
 .counter{display:flex;align-items:center;gap:9px}.counter-line{width:20px;height:1px;background:rgba(0,0,0,.45)}
 button{border:0;background:none;color:var(--ink);padding:0;font:inherit;cursor:pointer}button:hover{opacity:.5}
 
-.intro{position:fixed;z-index:1000;inset:0;background:var(--paper);display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:1;transition:opacity 900ms ease;visibility:visible}
-.intro-text{font-size:clamp(38px,6vw,90px);letter-spacing:-.055em;animation:introin .7s ease both}
+.intro{position:fixed;z-index:1000;inset:0;background:var(--paper);display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:1;transition:opacity 1200ms ease;visibility:visible}
+.intro-text{font-size:clamp(38px,6vw,90px);letter-spacing:-.055em;animation:introin .8s ease both}
 @keyframes introin{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 .intro.hide{opacity:0;visibility:hidden}
 
@@ -50,96 +59,235 @@ button{border:0;background:none;color:var(--ink);padding:0;font:inherit;cursor:p
  .wall-wrap{width:min(calc(100vw - 30px),calc(100vh - 155px));top:49%}
  .footer-left{left:15px;bottom:15px}.footer-right{right:15px;bottom:16px;gap:12px}
 }
+@media(prefers-reduced-motion:reduce){
+ .tile{transition-duration:0ms!important}.tile img{transition-duration:0ms!important}
+ .intro{transition-duration:0ms!important}
+}
 </style>
 </head>
 <body>
 <div class="page">
   <div class="intro"><div class="intro-text">ukraine@war</div></div>
-  <header class="masthead"><h1 class="title">ukraine@war</h1><div class="subtitle">67 images / living wall</div></header>
+  <header class="masthead"><h1 class="title">ukraine@war</h1><div class="subtitle">ultra-competitive<br>ukraine-style politics</div></header>
   <div class="credit">drone dept. / 2026</div>
   <div class="wall-wrap"><main id="wall" class="wall"></main></div>
-  <div id="hero" class="hero"><img id="heroImg" alt=""></div>
-  <div class="footer-left"><div class="footer-label">The Daily Dispatch</div><a class="subscribe" href="https://abdymok.substack.com/" target="_blank" rel="noopener">Read &amp; subscribe on Substack →</a></div>
+  <div class="footer-left"><div class="footer-label"></div><a class="subscribe" href="https://abdymok.substack.com/" target="_blank" rel="noopener">Read &amp; subscribe on Substack →</a></div>
   <div class="footer-right"><div class="counter"><span id="counter">01</span><span class="counter-line"></span></div><button id="recompose">Recompose</button><button id="pause">Pause</button></div>
 </div>
+
 <script>
-// The repository contains these exact 67 images: 1.jfif–6.jfif and 7.jpg–67.jpg.
+/*
+  Living-wall engine
+  - 67 source images
+  - 8×8 spatial field
+  - persistent tile identities (no DOM rebuild during recomposition)
+  - up to 3 simultaneous 3×3 heroes
+  - clicked tile becomes a hero
+  - FLIP-style movement keeps every tile spatially continuous
+*/
 const FILES=["1.jfif","2.jfif","3.jfif","4.jfif","5.jfif","6.jfif"];
 for(let i=7;i<=67;i++) FILES.push(i+".jpg");
 
 const wall=document.getElementById("wall");
 const counter=document.getElementById("counter");
 const pauseBtn=document.getElementById("pause");
-const hero=document.getElementById("hero");
-const heroImg=document.getElementById("heroImg");
-let tiles=[];
-let order=[];
-let round=0;
-let paused=false;
-let heroTimeout=0;
-let timerA=0,timerB=0;
+const intro=document.querySelector(".intro");
+
+const N=8, GAP=5, HERO=3, MAX_HEROES=3;
+let tiles=[], order=[], heroes=[], round=0, paused=false;
+let heartbeat=0, heroHeartbeat=0, breathHeartbeat=0;
 const imageCache=new Map();
 
 for(const src of FILES){
   const im=new Image();
+  im.decoding="async";
   im.src=src;
   imageCache.set(src,im);
 }
 
 function shuffle(a){
   const b=a.slice();
-  for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]]}
+  for(let i=b.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [b[i],b[j]]=[b[j],b[i]];
+  }
   return b;
+}
+
+function tileKey(src){return src.replace(/[^a-z0-9]/gi,"_")}
+
+function createTile(src){
+  const tile=document.createElement("div");
+  tile.className="tile";
+  tile.dataset.src=src;
+  tile.dataset.key=tileKey(src);
+
+  const a=document.createElement("img");
+  a.className="a";
+  a.src=src;
+  a.alt="";
+
+  const b=document.createElement("img");
+  b.className="b";
+  b.alt="";
+
+  tile.append(a,b);
+  wall.append(tile);
+
+  const item={el:tile,src,a,b,row:0,col:0,size:1,hero:false};
+  tile.addEventListener("click",()=>promote(item));
+  tiles.push(item);
+  return item;
 }
 
 function build(){
   order=shuffle(FILES).slice(0,64);
-  wall.replaceChildren(); tiles=[];
-  order.forEach(src=>{
-    const tile=document.createElement("div"); tile.className="tile";
-    const a=document.createElement("img"); a.className="a"; a.src=src;
-    const b=document.createElement("img"); b.className="b"; b.alt="";
-    tile.append(a,b); wall.append(tile); tiles.push(tile);
-    tile.addEventListener("click",()=>showHeroAt(tiles.indexOf(tile)));
+  order.forEach(createTile);
+  layout(true);
+}
+
+function metrics(){
+  const r=wall.getBoundingClientRect();
+  const cell=(r.width-GAP*7)/8;
+  return {r,cell,step:cell+GAP};
+}
+
+function occupiedByHeroes(){
+  const occupied=new Set();
+  heroes.forEach(h=>{
+    for(let y=h.row;y<h.row+HERO;y++)
+      for(let x=h.col;x<h.col+HERO;x++)
+        occupied.add(y*8+x);
+  });
+  return occupied;
+}
+
+function chooseHeroOrigin(preferred){
+  const occupied=occupiedByHeroes();
+  const candidates=[];
+  for(let row=0;row<=N-HERO;row++){
+    for(let col=0;col<=N-HERO;col++){
+      let ok=true;
+      for(let y=row;y<row+HERO;y++) for(let x=col;x<col+HERO;x++){
+        if(occupied.has(y*8+x)){ok=false;break}
+      }
+      if(ok){
+        const d=preferred?Math.abs(col-preferred.col)+Math.abs(row-preferred.row):0;
+        candidates.push({row,col,d});
+      }
+    }
+  }
+  if(!candidates.length)return null;
+  candidates.sort((a,b)=>a.d-b.d || Math.random()-.5);
+  return candidates[0];
+}
+
+function currentRects(){
+  const m=metrics();
+  const map=new Map();
+  tiles.forEach(t=>{
+    const el=t.el;
+    const rect=el.getBoundingClientRect();
+    map.set(t,rect);
+  });
+  return {m,map};
+}
+
+function applyLayout(instant=false){
+  const {m,before}=applyLayout.beforeData||{};
+  const currentM=metrics();
+  const occupied=occupiedByHeroes();
+
+  // Give small tiles the remaining cells. Heroes retain their own 3×3 footprint.
+  const free=[];
+  for(let row=0;row<N;row++) for(let col=0;col<N;col++){
+    if(!occupied.has(row*8+col)) free.push({row,col});
+  }
+
+  const heroSet=new Set(heroes);
+  let freeIndex=0;
+
+  // Existing spatial ordering is kept as much as possible; only tiles displaced by
+  // heroes are moved to the next available cells.
+  const small=tiles.filter(t=>!heroSet.has(t));
+  small.sort((a,b)=>(a.row*8+a.col)-(b.row*8+b.col));
+
+  small.forEach(t=>{
+    const p=free[freeIndex++];
+    if(p){t.row=p.row;t.col=p.col;t.size=1;}
+  });
+
+  heroes.forEach(h=>{h.size=HERO;h.hero=true;});
+
+  tiles.forEach(t=>{
+    const x=t.col*currentM.step;
+    const y=t.row*currentM.step;
+    const size=t.size*currentM.cell+(t.size-1)*GAP;
+    const el=t.el;
+
+    el.classList.toggle("hero-tile",t.hero);
+    el.style.width=size+"px";
+    el.style.height=size+"px";
+    el.style.left=x+"px";
+    el.style.top=y+"px";
+    el.style.zIndex=t.hero?30:10;
+  });
+
+  if(instant || !before)return;
+
+  // FLIP: invert the new position back to the old position, then let CSS animate.
+  tiles.forEach(t=>{
+    const old=before.get(t);
+    if(!old)return;
+    const now=t.el.getBoundingClientRect();
+    const dx=old.left-now.left;
+    const dy=old.top-now.top;
+    const sx=old.width/now.width;
+    const sy=old.height/now.height;
+    if(Math.abs(dx)<.5 && Math.abs(dy)<.5 && Math.abs(sx-1)<.002 && Math.abs(sy-1)<.002)return;
+    t.el.style.transition="none";
+    t.el.style.transform=`translate3d(${dx}px,${dy}px,0) scale(${sx},${sy})`;
+    requestAnimationFrame(()=>{
+      requestAnimationFrame(()=>{
+        if(!t.el.isConnected)return;
+        t.el.style.transition="";
+        t.el.style.transform="translate3d(0,0,0) scale(1,1)";
+      });
+    });
   });
 }
 
-function swapTile(index,src,delay){
-  const tile=tiles[index];
-  if(!tile || src===order[index]) return;
+function layout(instant=false){
+  const data=currentRects();
+  applyLayout.beforeData={before:data.map};
+  applyLayout(instant);
+  applyLayout.beforeData=null;
+}
 
+function swapImage(t,src,delay=0){
+  if(!t || t.src===src)return;
   setTimeout(()=>{
     if(paused)return;
-    const a=tile.querySelector(".a");
-    const b=tile.querySelector(".b");
-
-    // Put the incoming image in the hidden layer first.
-    b.src=src;
-
+    t.b.src=src;
     const begin=()=>{
       if(paused)return;
-      // Start only after the browser has a real frame to paint.
       requestAnimationFrame(()=>requestAnimationFrame(()=>{
         if(paused)return;
-        tile.classList.add("swap","lift2");
-
-        // Let the full 3.6s dissolve finish before replacing the base layer.
+        t.el.classList.add("swap","lift");
         setTimeout(()=>{
           if(paused)return;
-          a.src=src;
-          b.removeAttribute("src");
-          tile.classList.remove("swap");
-          order[index]=src;
-        },3750);
-
-        setTimeout(()=>tile.classList.remove("lift2"),9000);
+          t.a.src=src;
+          t.b.removeAttribute("src");
+          t.el.classList.remove("swap");
+          t.src=src;
+          t.el.dataset.src=src;
+        },3600);
       }));
     };
-
-    if(b.complete && b.naturalWidth>0) begin();
-    else {
-      b.addEventListener("load",begin,{once:true});
-      b.addEventListener("error",begin,{once:true});
+    if(t.b.complete&&t.b.naturalWidth>0)begin();
+    else{
+      t.b.addEventListener("load",begin,{once:true});
+      t.b.addEventListener("error",begin,{once:true});
     }
   },delay);
 }
@@ -149,80 +297,149 @@ function recompose(){
   round++;
   counter.textContent=String(((round-1)%99)+1).padStart(2,"0");
 
-  // 16 cells change on each pass. This is intentionally more visible than the previous version.
-  const cells=shuffle([...Array(64).keys()]).slice(0,9);
-  const current=cells.map(i=>order[i]);
-  let incoming=shuffle(current);
-  if(incoming.every((v,i)=>v===current[i])) incoming=incoming.slice(1).concat(incoming[0]);
+  // Small, asynchronous image changes. The spatial layout itself remains continuous.
+  const candidates=shuffle(tiles.filter(t=>!t.hero));
+  const count=7+Math.floor(Math.random()*5);
+  const chosen=candidates.slice(0,count);
 
-  // Keep exactly 64 occupied cells, while cycling the 3 off-wall images through the wall.
-  const off=FILES.filter(f=>!order.includes(f));
-  if(off.length){incoming[0]=off[(round-1)%off.length]}
-
-  cells.forEach((cell,i)=>swapTile(cell,incoming[i],i*420));
-
-  // Very slow, barely perceptible breathing across the wall.
-  tiles.forEach((tile,i)=>{
-    tile.classList.remove("lift");
-    setTimeout(()=>{if(!paused)tile.classList.add("lift")},(i%8)*220);
+  const off=FILES.filter(f=>!tiles.some(t=>t.src===f));
+  chosen.forEach((t,i)=>{
+    const pool=off.length?off:FILES;
+    let src=pool[Math.floor(Math.random()*pool.length)];
+    if(src===t.src)src=pool[(pool.indexOf(src)+1)%pool.length];
+    swapImage(t,src,i*260);
   });
 
-  // A square 2×2-cell hero, occasionally — never rectangular.
-  if(round%2===0) setTimeout(()=>{if(!paused)showHero()},1200);
-  if(round%3===0) setTimeout(()=>{if(!paused)showHero()},4200);
+  // Every few rounds, change one hero without collapsing the others.
+  if(round%3===0 && heroes.length) rotateHero(heroes[Math.floor(Math.random()*heroes.length)]);
+  if(round%5===0 && heroes.length<MAX_HEROES) autoHero();
 }
 
-function showHeroAt(index){
-  if(paused || !order[index])return;
-  const r=wall.getBoundingClientRect();
-  const gap=parseFloat(getComputedStyle(wall).gap)||5;
-  const cell=(r.width-gap*7)/8;
-  const step=cell+gap;
-  const size=cell*3+gap*2;
-  const col=index%8;
-  const row=Math.floor(index/8);
+function promote(t){
+  if(paused)return;
 
-  // Anchor the hero to the clicked square, but keep the 2×2 square inside the wall.
-  const heroCol=Math.min(col,6);
-  const heroRow=Math.min(row,6);
-  hero.style.width=size+"px";
-  hero.style.height=size+"px";
-  hero.style.left=(r.left+heroCol*step)+"px";
-  hero.style.top=(r.top+heroRow*step)+"px";
-  heroImg.src=order[index];
-  hero.style.display="block";
-  requestAnimationFrame(()=>hero.classList.add("show"));
-  clearTimeout(heroTimeout);
-  heroTimeout=setTimeout(hideHero,9000);
+  // Clicking an existing hero gently removes it.
+  if(t.hero){
+    removeHero(t);
+    return;
+  }
+
+  if(heroes.length>=MAX_HEROES){
+    removeHero(heroes[0],true);
+  }
+
+  const preferred={row:Math.min(t.row,5),col:Math.min(t.col,5)};
+  const origin=chooseHeroOrigin(preferred);
+  if(!origin)return;
+
+  heroes.push(t);
+  t.row=origin.row;t.col=origin.col;t.size=HERO;t.hero=true;
+  layout(false);
+
+  // Let the image breathe slightly after the spatial expansion.
+  t.el.classList.add("lift");
+  setTimeout(()=>t.el.classList.remove("lift"),6500);
 }
 
-function showHero(){
-  if(hero.classList.contains("show"))return;
-  const index=Math.floor(Math.random()*order.length);
-  showHeroAt(index);
+function removeHero(t,silent=false){
+  if(!t)return;
+  heroes=heroes.filter(h=>h!==t);
+  t.hero=false;
+  layout(false);
+  if(!silent){
+    t.el.classList.add("lift");
+    setTimeout(()=>t.el.classList.remove("lift"),5000);
+  }
 }
-function hideHero(){
-  hero.classList.remove("show");
-  clearTimeout(heroTimeout);
-  heroTimeout=setTimeout(()=>{if(!hero.classList.contains("show"))hero.style.display="none"},1800);
+
+function rotateHero(t){
+  if(!t||paused)return;
+  const currentIndex=tiles.indexOf(t);
+  const others=shuffle(tiles.filter(x=>!x.hero&&x!==t));
+  if(!others.length)return;
+  const replacement=others[0];
+
+  // Transfer the hero footprint to another image rather than creating a new overlay.
+  const origin={row:t.row,col:t.col};
+  const oldHero=t;
+  oldHero.hero=false;
+  heroes=heroes.filter(h=>h!==oldHero);
+
+  replacement.row=origin.row;
+  replacement.col=origin.col;
+  replacement.size=HERO;
+  replacement.hero=true;
+  heroes.push(replacement);
+
+  layout(false);
+
+  // Old hero becomes a normal tile and its image stays in the wall.
+  void currentIndex;
 }
+
+function autoHero(){
+  if(paused||heroes.length>=MAX_HEROES)return;
+  const candidates=shuffle(tiles.filter(t=>!t.hero));
+  if(candidates[0])promote(candidates[0]);
+}
+
+function breathe(){
+  if(paused)return;
+  tiles.forEach((t,i)=>{
+    const delay=(i%8)*190;
+    setTimeout(()=>{
+      if(!paused)t.el.classList.add("lift");
+    },delay);
+    setTimeout(()=>{
+      t.el.classList.remove("lift");
+    },delay+5200);
+  });
+}
+
 function togglePause(){
   paused=!paused;
   pauseBtn.textContent=paused?"Play":"Pause";
-  if(paused)hideHero();
+  if(paused){
+    clearInterval(heartbeat);
+    clearInterval(heroHeartbeat);
+    clearInterval(breathHeartbeat);
+  }else{
+    startHeartbeats();
+  }
+}
+
+function startHeartbeats(){
+  clearInterval(heartbeat);
+  clearInterval(heroHeartbeat);
+  clearInterval(breathHeartbeat);
+
+  heartbeat=setInterval(recompose,6200);
+  heroHeartbeat=setInterval(()=>{
+    if(paused)return;
+    const r=Math.random();
+    if(r<.58)autoHero();
+    else if(r<.76 && heroes.length)rotateHero(heroes[Math.floor(Math.random()*heroes.length)]);
+    else if(r<.9 && heroes.length)removeHero(heroes[0]);
+  },7200);
+  breathHeartbeat=setInterval(breathe,11500);
 }
 
 build();
-setTimeout(()=>document.querySelector(".intro").classList.add("hide"),1400);
+setTimeout(()=>intro.classList.add("hide"),1500);
+
 document.getElementById("recompose").addEventListener("click",recompose);
 pauseBtn.addEventListener("click",togglePause);
 
-// Deterministic heartbeat: first change at 2 seconds, then every 5 seconds.
-timerA=setTimeout(()=>recompose(),2000);
-timerB=setInterval(()=>recompose(),5000);
-// Independent hero heartbeat, so the hero does not depend on a successful shuffle round.
-setInterval(()=>{if(!paused && Math.random()<0.78)showHero()},4200);
-window.addEventListener("resize",hideHero);
+setTimeout(()=>{if(!paused){recompose();autoHero();}},2300);
+setTimeout(()=>{if(!paused)autoHero();},6100);
+
+window.addEventListener("resize",()=>{
+  tiles.forEach(t=>t.el.style.transition="none");
+  layout(true);
+  requestAnimationFrame(()=>tiles.forEach(t=>t.el.style.transition=""));
+});
+
+startHeartbeats();
 </script>
 </body>
 </html>
