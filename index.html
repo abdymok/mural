@@ -46,7 +46,7 @@ body{font-family:Arial,sans-serif}
 .counter{display:flex;align-items:center;gap:9px}.counter-line{width:20px;height:1px;background:rgba(0,0,0,.45)}
 button{border:0;background:none;color:var(--ink);padding:0;font:inherit;cursor:pointer}button:hover{opacity:.5}
 .intro{position:fixed;z-index:1000;inset:0;background:var(--paper);display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:1;transition:opacity 1200ms ease;visibility:visible}
-.intro-text{font-size:clamp(38px,6vw,90px);letter-spacing:-.055em;animation:introin .8s ease both}
+.intro-logo{display:block;width:140px;height:auto;max-width:30vw;max-height:30vh;object-fit:contain;animation:introin .8s ease both}
 @keyframes introin{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 .intro.hide{opacity:0;visibility:hidden}
 
@@ -97,7 +97,7 @@ button{border:0;background:none;color:var(--ink);padding:0;font:inherit;cursor:p
 </head>
 <body>
 <div class="page">
-  <div class="intro"><div class="intro-text">ukraine@war</div></div>
+  <div class="intro"><img class="intro-logo" src="abdymok.gif" alt="abd ymok"></div>
   <header class="masthead"><h1 class="title">ukraine@war</h1><div class="subtitle">ultra-competitive<br>ukraine-style politics</div></header>
   <div class="credit">drone dept. / 2026</div>
   <div class="wall-wrap"><main id="wall" class="wall"></main></div>
@@ -452,7 +452,7 @@ function startHeartbeats(){
   breathHeartbeat=setInterval(breathe,11500);
 }
 build();
-setTimeout(()=>intro.classList.add("hide"),1500);
+setTimeout(()=>intro.classList.add("hide"),3000);
 
 document.getElementById("recompose").addEventListener("click",recompose);
 pauseBtn.addEventListener("click",togglePause);
