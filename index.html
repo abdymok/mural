@@ -1,20 +1,21 @@
 <!doctype html>
 <html lang="en">
-<head><!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-4FJQWFFPBM"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-
-  gtag('js', new Date());
-  gtag('config', 'G-4FJQWFFPBM');
-</script>
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;500&display=swap" rel="stylesheet">
 <title>ukraine@war</title>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-4FJQWFFPBM"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-4FJQWFFPBM');
+</script>
 <style>
 :root{--paper:#fff;--ink:#111;--gap:5px;--ease:cubic-bezier(.22,.61,.36,1)}
 *{box-sizing:border-box}
@@ -205,7 +206,17 @@ function createTile(src){
     // the CSS .swap class is applied.
     const filename=item.displayedSrc.split("/").pop();
     const url=SUBSTACK_LINKS[FILES.indexOf(filename)];
-    if(url) window.open(url,"_blank","noopener");
+
+    if(url){
+      gtag("event","mural_asset_click",{
+        asset_id:filename,
+        asset_number:FILES.indexOf(filename)+1,
+        substack_day:url.split("/").pop(),
+        destination_url:url
+      });
+
+      window.open(url,"_blank","noopener");
+    }
   });
   tiles.push(item);
 
