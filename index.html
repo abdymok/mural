@@ -121,6 +121,7 @@ button{border:0;background:none;color:var(--ink);padding:0;font:inherit;cursor:p
 */
 const FILES=["1.jfif","2.jfif","3.jfif","4.jfif","5.jfif","6.jfif"];
 for(let i=7;i<=67;i++) FILES.push(i+".jpg");
+const SUBSTACK_LINKS=['https://abdymok.substack.com/p/day-1591', 'https://abdymok.substack.com/p/day-1595', 'https://abdymok.substack.com/p/day-1658', 'https://abdymok.substack.com/p/day-1541', 'https://abdymok.substack.com/p/day-1446', 'https://abdymok.substack.com/p/day-1430', 'https://abdymok.substack.com/p/day-1643', 'https://abdymok.substack.com/p/day-1560', 'https://abdymok.substack.com/p/day-1498', 'https://abdymok.substack.com/p/day-1492', 'https://abdymok.substack.com/p/day-1563', 'https://abdymok.substack.com/p/day-1658', 'https://abdymok.substack.com/p/day-1526', 'https://abdymok.substack.com/p/day-1511', 'https://abdymok.substack.com/p/day-1647', 'https://abdymok.substack.com/p/day-1530', 'https://abdymok.substack.com/p/day-1538', 'https://abdymok.substack.com/p/day-1505', 'https://abdymok.substack.com/p/day-1500', 'https://abdymok.substack.com/p/day-1496', 'https://abdymok.substack.com/p/day-1534', 'https://abdymok.substack.com/p/day-1555', 'https://abdymok.substack.com/p/day-1637', 'https://abdymok.substack.com/p/day-1548', 'https://abdymok.substack.com/p/day-1543', 'https://abdymok.substack.com/p/day-1545', 'https://abdymok.substack.com/p/day-1507', 'https://abdymok.substack.com/p/day-1653', 'https://abdymok.substack.com/p/day-1540', 'https://abdymok.substack.com/p/day-1575', 'https://abdymok.substack.com/p/day-1582', 'https://abdymok.substack.com/p/day-1646', 'https://abdymok.substack.com/p/day-833', 'https://abdymok.substack.com/p/day-838', 'https://abdymok.substack.com/p/day-839', 'https://abdymok.substack.com/p/day-841', 'https://abdymok.substack.com/p/day-916', 'https://abdymok.substack.com/p/day-929', 'https://abdymok.substack.com/p/day-943', 'https://abdymok.substack.com/p/day-947', 'https://abdymok.substack.com/p/day-1631', 'https://abdymok.substack.com/p/day-1643', 'https://abdymok.substack.com/p/day-1640', 'https://abdymok.substack.com/p/day-1542', 'https://abdymok.substack.com/p/day-1654', 'https://abdymok.substack.com/p/day-1652', 'https://abdymok.substack.com/p/day-1497', 'https://abdymok.substack.com/p/day-1659', 'https://abdymok.substack.com/p/day-1554', 'https://abdymok.substack.com/p/day-1553', 'https://abdymok.substack.com/p/day-1632', 'https://abdymok.substack.com/p/day-1561', 'https://abdymok.substack.com/p/day-1503', 'https://abdymok.substack.com/p/day-1506', 'https://abdymok.substack.com/p/day-1556', 'https://abdymok.substack.com/p/day-1625', 'https://abdymok.substack.com/p/day-1664', 'https://abdymok.substack.com/p/day-1649', 'https://abdymok.substack.com/p/day-1559', 'https://abdymok.substack.com/p/day-1513', 'https://abdymok.substack.com/p/day-1493', 'https://abdymok.substack.com/p/day-1624', 'https://abdymok.substack.com/p/day-1509', 'https://abdymok.substack.com/p/day-1532', 'https://abdymok.substack.com/p/day-1562', 'https://abdymok.substack.com/p/day-1546', 'https://abdymok.substack.com/p/day-1533'];
 const wall=document.getElementById("wall");
 const counter=document.getElementById("counter");
 const pauseBtn=document.getElementById("pause");
@@ -187,7 +188,10 @@ function createTile(src){
   wall.append(tile);
 
   const item={el:tile,src,a,b,row:0,col:0,size:1,hero:false};
-  tile.addEventListener("click",()=>promote(item));
+  tile.addEventListener("click",()=>{
+    const url=SUBSTACK_LINKS[FILES.indexOf(item.src)];
+    if(url) window.open(url,"_blank","noopener");
+  });
   tiles.push(item);
 
   waitForImage(src).then(()=>{
