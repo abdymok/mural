@@ -373,6 +373,10 @@ function recompose(){
   if(round%3===0 && heroes.length) rotateHero(heroes[Math.floor(Math.random()*heroes.length)]);
   if(round%5===0 && heroes.length<MAX_HEROES) autoHero();
 }
+function heroImageSet(exclude){
+  return new Set(heroes.filter(h=>h!==exclude).map(h=>h.displayedSrc||h.src));
+}
+
 function promote(t){
   if(paused)return;
 
@@ -380,6 +384,9 @@ function promote(t){
     removeHero(t);
     return;
   }
+
+  // Never allow two hero tiles to display the same image.
+  if(heroImageSet().has(t.displayedSrc||t.src))return;
 
   if(heroes.length>=MAX_HEROES){
     removeHero(heroes[0],true);
@@ -409,7 +416,8 @@ function removeHero(t,silent=false){
 function rotateHero(t){
   if(!t||paused)return;
   const currentIndex=tiles.indexOf(t);
-  const others=shuffle(tiles.filter(x=>!x.hero&&x!==t));
+  const usedByOtherHeroes=heroImageSet(t);
+  const others=shuffle(tiles.filter(x=>!x.hero&&x!==t&&!usedByOtherHeroes.has(x.displayedSrc||x.src)));
   if(!others.length)return;
   const replacement=others[0];
 
@@ -430,7 +438,8 @@ function rotateHero(t){
 
 function autoHero(){
   if(paused||heroes.length>=MAX_HEROES)return;
-  const candidates=shuffle(tiles.filter(t=>!t.hero));
+  const usedByHeroes=heroImageSet();
+  const candidates=shuffle(tiles.filter(t=>!t.hero&&!usedByHeroes.has(t.displayedSrc||t.src)));
   if(candidates[0])promote(candidates[0]);
 }
 function breathe(){
