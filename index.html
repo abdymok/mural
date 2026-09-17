@@ -19,8 +19,13 @@ body{font-family:Arial,sans-serif}
 .subtitle{margin-top:9px;font:9px Arial,sans-serif;letter-spacing:.1em;text-transform:uppercase}
 .credit{position:absolute;z-index:100;top:22px;right:22px;font:9px Arial,sans-serif;letter-spacing:.13em;text-transform:uppercase;writing-mode:vertical-rl;transform:rotate(180deg)}
 .wall-wrap{position:absolute;z-index:5;left:50%;top:51%;transform:translate(-50%,-50%);width:min(calc(100vw - 48px),calc(100vh - 185px));aspect-ratio:1}
-.wall{position:relative;width:100%;height:100%;opacity:0;transition:opacity 5500ms cubic-bezier(.22,.61,.36,1)}
-.wall.reveal{opacity:1}
+.wall{position:relative;width:100%;height:100%;opacity:0;transform:scale(.995);filter:blur(2px);transition:opacity 7000ms cubic-bezier(.22,.61,.36,1),transform 7000ms cubic-bezier(.22,.61,.36,1),filter 7000ms cubic-bezier(.22,.61,.36,1)}
+.wall.reveal{opacity:1;transform:scale(1);filter:blur(0)}
+.wall.reveal .tile{animation:mistTile 5200ms cubic-bezier(.22,.61,.36,1) both}
+.wall.reveal .tile:nth-child(3n){animation-delay:120ms}
+.wall.reveal .tile:nth-child(5n){animation-delay:240ms}
+.wall.reveal .tile:nth-child(7n){animation-delay:360ms}
+@keyframes mistTile{from{opacity:0;filter:blur(1.5px)}to{opacity:1;filter:blur(0)}}
 .tile{
   position:absolute;overflow:hidden;background:#111;cursor:pointer;
   will-change:transform,width,height,opacity;
@@ -455,15 +460,15 @@ function startHeartbeats(){
 build();
 setTimeout(()=>{
   intro.classList.add("hide");
-  setTimeout(()=>wall.classList.add("reveal"),500);
+  setTimeout(()=>wall.classList.add("reveal"),800);
   setTimeout(()=>intro.style.visibility="hidden",1800);
 },6000);
 
 document.getElementById("recompose").addEventListener("click",recompose);
 pauseBtn.addEventListener("click",togglePause);
 
-setTimeout(()=>{if(!paused){recompose();autoHero();}},2300);
-setTimeout(()=>{if(!paused)autoHero();},6100);
+setTimeout(()=>{if(!paused){recompose();autoHero();}},8500);
+setTimeout(()=>{if(!paused)autoHero();},10800);
 
 window.addEventListener("resize",()=>{
   tiles.forEach(t=>t.el.style.transition="none");
