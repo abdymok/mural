@@ -45,7 +45,7 @@ body{font-family:Arial,sans-serif}
 .footer-right{position:absolute;z-index:100;right:24px;bottom:23px;display:flex;align-items:center;gap:19px;font:9px Arial,sans-serif;letter-spacing:.12em;text-transform:uppercase}
 .counter{display:flex;align-items:center;gap:9px}.counter-line{width:20px;height:1px;background:rgba(0,0,0,.45)}
 button{border:0;background:none;color:var(--ink);padding:0;font:inherit;cursor:pointer}button:hover{opacity:.5}
-.intro{position:fixed;z-index:1000;inset:0;background:var(--paper);display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:1;transition:opacity 1200ms ease;visibility:visible}
+.intro{position:fixed;z-index:1000;inset:0;background:var(--paper);display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:1;transition:opacity 1800ms cubic-bezier(.22,.61,.36,1);visibility:visible}
 .intro-logo{display:block;width:140px;height:auto;max-width:30vw;max-height:30vh;object-fit:contain;animation:introin .8s ease both}
 @keyframes introin{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 .intro.hide{opacity:0;visibility:hidden}
@@ -452,7 +452,10 @@ function startHeartbeats(){
   breathHeartbeat=setInterval(breathe,11500);
 }
 build();
-setTimeout(()=>intro.classList.add("hide"),6000);
+setTimeout(()=>{
+  intro.classList.add("hide");
+  setTimeout(()=>intro.style.visibility="hidden",1800);
+},6000);
 
 document.getElementById("recompose").addEventListener("click",recompose);
 pauseBtn.addEventListener("click",togglePause);
