@@ -31,10 +31,10 @@ body{font-family:Arial,sans-serif}
   transform-origin:center center;
 }
 .tile img{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:cover}
-.tile .a{z-index:1;opacity:0}
-.tile .a.loaded{opacity:1}
-.tile .b{z-index:2;opacity:0}
-.tile.swap .b.loaded{opacity:1}
+.tile .a{z-index:1;opacity:0;visibility:hidden}
+.tile .a.loaded{opacity:1;visibility:visible}
+.tile .b{z-index:2;opacity:0;visibility:hidden}
+.tile.swap .b.loaded{opacity:1;visibility:visible}
 .tile img{transition:opacity 3600ms ease,transform 9000ms var(--ease);will-change:opacity,transform}
 .tile.lift .a,.tile.lift .b{transform:scale(1.012)}
 .tile.hero-tile{z-index:30;cursor:pointer;box-shadow:0 0 0 1px rgba(0,0,0,.18)}
@@ -142,6 +142,28 @@ function shuffle(a){
 
 function tileKey(src){return src.replace(/[^a-z0-9]/gi,"_")}
 
+function waitForImage(src){
+  return new Promise((resolve,reject)=>{
+    const im=imageCache.get(src);
+    if(im && im.complete){
+      if(im.naturalWidth>0) resolve(im);
+      else reject(new Error("Image failed to load: "+src));
+      return;
+    }
+    if(im){
+      im.addEventListener("load",()=>resolve(im),{once:true});
+      im.addEventListener("error",()=>reject(new Error("Image failed to load: "+src)),{once:true});
+      return;
+    }
+    const next=new Image();
+    next.decoding="async";
+    next.addEventListener("load",()=>{imageCache.set(src,next);resolve(next)},{once:true});
+    next.addEventListener("error",()=>reject(new Error("Image failed to load: "+src)),{once:true});
+    next.src=src;
+    imageCache.set(src,next);
+  });
+}
+
 function createTile(src){
   const tile=document.createElement("div");
   tile.className="tile";
@@ -155,25 +177,20 @@ function createTile(src){
   b.className="b";
   b.alt="";
 
-  const revealWhenLoaded=(img,url)=>{
-    img.classList.remove("loaded");
-    const reveal=()=>{
-      img.classList.add("loaded");
-      img.removeEventListener("load",reveal);
-    };
-    img.addEventListener("load",reveal,{once:true});
-    img.src=url;
-    if(img.complete&&img.naturalWidth>0) reveal();
-  };
-
-  revealWhenLoaded(a,src);
-
   tile.append(a,b);
   wall.append(tile);
 
-  const item={el:tile,src,a,b,row:0,col:0,size:1,hero:false,revealWhenLoaded};
+  const item={el:tile,src,a,b,row:0,col:0,size:1,hero:false};
   tile.addEventListener("click",()=>promote(item));
   tiles.push(item);
+
+  waitForImage(src).then(()=>{
+    if(item.src===src){
+      a.src=src;
+      a.classList.add("loaded");
+    }
+  }).catch(()=>{});
+
   return item;
 }
 
@@ -292,32 +309,28 @@ function swapImage(t,src,delay=0){
   if(!t || t.src===src)return;
   setTimeout(()=>{
     if(paused)return;
-    t.b.classList.remove("loaded");
-    const begin=()=>{
-      if(paused)return;
+    waitForImage(src).then(()=>{
+      if(paused || !t || t.src===src)return;
+
+      t.b.classList.remove("loaded");
+      t.b.src=src;
+      t.b.classList.add("loaded");
+
       requestAnimationFrame(()=>requestAnimationFrame(()=>{
         if(paused)return;
         t.el.classList.add("swap","lift");
         setTimeout(()=>{
           if(paused)return;
           t.a.src=src;
+          t.a.classList.add("loaded");
           t.b.removeAttribute("src");
+          t.b.classList.remove("loaded");
           t.el.classList.remove("swap");
           t.src=src;
           t.el.dataset.src=src;
         },3600);
       }));
-    };
-    t.b.addEventListener("load",()=>t.b.classList.add("loaded"),{once:true});
-    t.b.src=src;
-    if(t.b.complete&&t.b.naturalWidth>0){
-      t.b.classList.add("loaded");
-      begin();
-    }
-    else{
-      t.b.addEventListener("load",begin,{once:true});
-      t.b.addEventListener("error",begin,{once:true});
-    }
+    }).catch(()=>{});
   },delay);
 }
 function recompose(){
