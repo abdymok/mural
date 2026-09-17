@@ -191,7 +191,19 @@ function createTile(src){
 
   const item={el:tile,src,a,b,row:0,col:0,size:1,hero:false};
   tile.addEventListener("click",()=>{
-    const url=SUBSTACK_LINKS[FILES.indexOf(item.src)];
+    // During a live swap, the B layer is the image actually being revealed.
+    // Use the visually active layer so a click during the crossfade never
+    // opens the previous image's post.
+    let displayedSrc=item.src;
+    const bSrc=item.b.getAttribute("src");
+    const aSrc=item.a.getAttribute("src");
+    if(item.el.classList.contains("swap") && item.b.classList.contains("loaded") && bSrc){
+      displayedSrc=bSrc;
+    }else if(aSrc){
+      displayedSrc=aSrc;
+    }
+    const filename=displayedSrc.split("/").pop();
+    const url=SUBSTACK_LINKS[FILES.indexOf(filename)];
     if(url) window.open(url,"_blank","noopener");
   });
   tiles.push(item);
