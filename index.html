@@ -31,9 +31,10 @@ body{font-family:Arial,sans-serif}
   transform-origin:center center;
 }
 .tile img{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:cover}
-.tile .a{z-index:1;opacity:1}
+.tile .a{z-index:1;opacity:0}
+.tile .a.loaded{opacity:1}
 .tile .b{z-index:2;opacity:0}
-.tile.swap .b{opacity:1}
+.tile.swap .b.loaded{opacity:1}
 .tile img{transition:opacity 3600ms ease,transform 9000ms var(--ease);will-change:opacity,transform}
 .tile.lift .a,.tile.lift .b{transform:scale(1.012)}
 .tile.hero-tile{z-index:30;cursor:pointer;box-shadow:0 0 0 1px rgba(0,0,0,.18)}
@@ -149,16 +150,28 @@ function createTile(src){
 
   const a=document.createElement("img");
   a.className="a";
-  a.src=src;
   a.alt="";
   const b=document.createElement("img");
   b.className="b";
   b.alt="";
 
+  const revealWhenLoaded=(img,url)=>{
+    img.classList.remove("loaded");
+    const reveal=()=>{
+      img.classList.add("loaded");
+      img.removeEventListener("load",reveal);
+    };
+    img.addEventListener("load",reveal,{once:true});
+    img.src=url;
+    if(img.complete&&img.naturalWidth>0) reveal();
+  };
+
+  revealWhenLoaded(a,src);
+
   tile.append(a,b);
   wall.append(tile);
 
-  const item={el:tile,src,a,b,row:0,col:0,size:1,hero:false};
+  const item={el:tile,src,a,b,row:0,col:0,size:1,hero:false,revealWhenLoaded};
   tile.addEventListener("click",()=>promote(item));
   tiles.push(item);
   return item;
@@ -279,7 +292,7 @@ function swapImage(t,src,delay=0){
   if(!t || t.src===src)return;
   setTimeout(()=>{
     if(paused)return;
-    t.b.src=src;
+    t.b.classList.remove("loaded");
     const begin=()=>{
       if(paused)return;
       requestAnimationFrame(()=>requestAnimationFrame(()=>{
@@ -295,7 +308,12 @@ function swapImage(t,src,delay=0){
         },3600);
       }));
     };
-    if(t.b.complete&&t.b.naturalWidth>0)begin();
+    t.b.addEventListener("load",()=>t.b.classList.add("loaded"),{once:true});
+    t.b.src=src;
+    if(t.b.complete&&t.b.naturalWidth>0){
+      t.b.classList.add("loaded");
+      begin();
+    }
     else{
       t.b.addEventListener("load",begin,{once:true});
       t.b.addEventListener("error",begin,{once:true});
