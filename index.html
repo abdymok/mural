@@ -7,15 +7,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;500&display=swap" rel="stylesheet">
 <title>ukraine@war</title>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-4FJQWFFPBM"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-4FJQWFFPBM');
-</script>
 <style>
 :root{--paper:#fff;--ink:#111;--gap:5px;--ease:cubic-bezier(.22,.61,.36,1)}
 *{box-sizing:border-box}
@@ -118,7 +109,7 @@ button{border:0;background:none;color:var(--ink);padding:0;font:inherit;cursor:p
   <header class="masthead"><h1 class="title">ukraine@war</h1><div class="subtitle">ultra-competitive<br>ukraine-style politics</div></header>
   <div class="credit">drone dept. / 2026</div>
   <div class="wall-wrap"><main id="wall" class="wall"></main></div>
-  <div class="footer-right"><div class="counter"><span id="counter">01</span><span class="counter-line"></span></div><button id="recompose">Recompose</button><button id="pause">Pause</button></div>
+  <div class="footer-right"><div class="counter"><span id="counter">01</span><span class="counter-line"></span></div><button id="recompose">Recompose</button><button id="pause">Pause</button><a class="subscribe" href="https://abdymok.substack.com/subscribe" target="_blank" rel="noopener">Subscribe</a></div>
 </div>
 <script>
 /*
@@ -206,17 +197,7 @@ function createTile(src){
     // the CSS .swap class is applied.
     const filename=item.displayedSrc.split("/").pop();
     const url=SUBSTACK_LINKS[FILES.indexOf(filename)];
-
-    if(url){
-      gtag("event","mural_asset_click",{
-        asset_id:filename,
-        asset_number:FILES.indexOf(filename)+1,
-        substack_day:url.split("/").pop(),
-        destination_url:url
-      });
-
-      window.open(url,"_blank","noopener");
-    }
+    if(url) window.open(url,"_blank","noopener");
   });
   tiles.push(item);
 
