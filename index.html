@@ -63,6 +63,33 @@ button{border:0;background:none;color:var(--ink);padding:0;font:inherit;cursor:p
  .tile{transition-duration:0ms!important}.tile img{transition-duration:0ms!important}
  .intro{transition-duration:0ms!important}
 }
+
+    @media (max-width: 700px){
+      .footer{
+        position: fixed;
+        left: max(16px, env(safe-area-inset-left));
+        right: max(16px, env(safe-area-inset-right));
+        bottom: max(14px, env(safe-area-inset-bottom));
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        pointer-events: none;
+      }
+      .footer > *{pointer-events:auto;}
+      .footer .controls{
+        display:flex;
+        align-items:center;
+        gap:14px;
+      }
+      .footer button,
+      .footer a{
+        position:relative;
+        z-index:1001;
+      }
+    }
+
 </style>
 </head>
 <body>
