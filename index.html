@@ -90,15 +90,6 @@ button{border:0;background:none;color:var(--ink);padding:0;font:inherit;cursor:p
     visibility:visible !important;
     opacity:1 !important;
   }
-
-  /* Mobile landscape: use the available width rather than shrinking the wall to the short viewport. */
-  @media (orientation: landscape) and (max-height: 700px){
-    .wall-wrap{
-      width:min(calc(100vw - 32px), calc(100vh - 96px));
-      top:52%;
-    }
-  }
-
   .footer-right button{
     display:inline-flex !important;
     position:relative !important;
