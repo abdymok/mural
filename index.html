@@ -19,15 +19,15 @@ body{font-family:Arial,sans-serif}
 .subtitle{margin-top:9px;padding-left:3px;font:400 11px/1.05 "Spectral",Georgia,"Times New Roman",serif;letter-spacing:0;text-transform:none}
 .credit{position:absolute;z-index:100;top:22px;right:22px;font:9px Arial,sans-serif;letter-spacing:.13em;text-transform:uppercase;writing-mode:vertical-rl;transform:rotate(180deg)}
 .wall-wrap{position:absolute;z-index:5;left:50%;top:51%;transform:translate(-50%,-50%);width:min(calc(100vw - 48px),calc(100vh - 185px));aspect-ratio:1}
-.wall{position:relative;width:100%;height:100%;opacity:0;transform:scale(.995);filter:blur(2px);transition:opacity 7000ms cubic-bezier(.22,.61,.36,1),transform 7000ms cubic-bezier(.22,.61,.36,1),filter 7000ms cubic-bezier(.22,.61,.36,1)}
-.wall.reveal{opacity:1;transform:scale(1);filter:blur(0)}
+.wall{position:relative;width:100%;height:100%;opacity:0;transform:scale(.995);filter:none;transition:opacity 7000ms cubic-bezier(.22,.61,.36,1),transform 7000ms cubic-bezier(.22,.61,.36,1)}
+.wall.reveal{opacity:1;transform:scale(1)}
 .wall.reveal .tile{animation:mistTile 5200ms cubic-bezier(.22,.61,.36,1) both}
 .wall.reveal .tile:nth-child(3n){animation-delay:120ms}
 .wall.reveal .tile:nth-child(5n){animation-delay:240ms}
 .wall.reveal .tile:nth-child(7n){animation-delay:360ms}
-@keyframes mistTile{from{opacity:0;filter:blur(1.5px)}to{opacity:1;filter:blur(0)}}
+@keyframes mistTile{from{opacity:0;transform:scale(.998)}to{opacity:1;transform:scale(1)}}
 .tile{
-  position:absolute;overflow:hidden;background:#111;cursor:pointer;
+  position:absolute;overflow:hidden;background:#fff;cursor:pointer;
   will-change:transform,width,height,opacity;
   transition:
     transform 2400ms var(--ease),
@@ -43,7 +43,7 @@ body{font-family:Arial,sans-serif}
 .tile.swap .b.loaded{opacity:1;visibility:visible}
 .tile img{transition:opacity 3600ms ease,transform 9000ms var(--ease);will-change:opacity,transform}
 .tile.lift .a,.tile.lift .b{transform:scale(1.012)}
-.tile.hero-tile{z-index:30;cursor:pointer;box-shadow:0 0 0 1px rgba(0,0,0,.18)}
+.tile.hero-tile{z-index:30;cursor:pointer;box-shadow:none}
 .tile.hero-tile img{transform:scale(1.002)}
 .tile.suspended{pointer-events:none;opacity:.02}
 .tile.entering{opacity:0}
@@ -89,6 +89,14 @@ button{border:0;background:none;color:var(--ink);padding:0;font:inherit;cursor:p
     pointer-events:auto !important;
     visibility:visible !important;
     opacity:1 !important;
+  }
+
+  /* Mobile landscape: use the available width rather than shrinking the wall to the short viewport. */
+  @media (orientation: landscape) and (max-height: 700px){
+    .wall-wrap{
+      width:min(calc(100vw - 32px), calc(100vh - 96px));
+      top:52%;
+    }
   }
 
   .footer-right button{
